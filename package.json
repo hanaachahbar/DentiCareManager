@@ -1,0 +1,17 @@
+{
+  "name": "denticare-manager",
+  "version": "1.0.0",
+  "description": "Dentist Management System Desktop App using React + Electron",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "concurrently \"npm run start-react\" \"wait-on http://localhost:3000 && electron .\"",
+    "start-react": "npm start --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "electron": "electron ."
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "electron": "^30.0.0",
+    "wait-on": "^7.0.0"
+  }
+}
