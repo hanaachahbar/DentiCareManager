@@ -7,7 +7,8 @@
     "start": "concurrently \"npm run start-react\" \"wait-on http://localhost:3000 && electron .\"",
     "start-react": "npm start --prefix frontend",
     "build": "npm run build --prefix frontend",
-    "electron": "electron ."
+    "electron": "electron .",
+    "install-all": "npm install && npm install --prefix frontend"
   },
   "devDependencies": {
     "concurrently": "^8.0.0",
