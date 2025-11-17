@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/DeleteModal.css';
+import '../styles/DeleteModalInvoice.css';
 
 const DeleteModal = ({ isOpen, onClose, onConfirm, invoice }) => {
   if (!isOpen) return null;

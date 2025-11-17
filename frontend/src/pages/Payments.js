@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Payments.css";
-import DeleteModal from "../components/DeleteModal";
+import DeleteModal from "../components/DeleteModalInvoice";
 
 const PaymentTracking = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -104,7 +104,7 @@ const PaymentTracking = () => {
     })
     .sort((a, b) => {
       if (sortBy === "date") return new Date(b.date) - new Date(a.date);
-      if (sortBy === "amount") return b.totalCharge - a.totalCharge;
+      if (sortBy === "total charge") return b.totalCharge - a.totalCharge;
       if (sortBy === "outstanding") return b.outstanding - a.outstanding;
       return 0;
     });
@@ -511,7 +511,7 @@ const PaymentTracking = () => {
                   <div className="dropdown-menu">
                     {[
                       { value: "date", label: "Date" },
-                      { value: "amount", label: "Amount" },
+                      { value: "total charge", label: "Total Charge" },
                       { value: "outstanding", label: "Outstanding" },
                     ].map((option) => (
                       <button

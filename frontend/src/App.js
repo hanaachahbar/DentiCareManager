@@ -7,7 +7,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Payments />} />
+        <Route path="/payments" element={<Payments />} />
       </Routes>
     </Router>
   );
