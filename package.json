@@ -10,8 +10,8 @@
     "electron": "electron ."
   },
   "devDependencies": {
-    "concurrently": "^8.0.0",
+    "concurrently": "^8.2.2",
     "electron": "^30.0.0",
-    "wait-on": "^7.0.0"
+    "wait-on": "^7.2.0"
   }
 }
