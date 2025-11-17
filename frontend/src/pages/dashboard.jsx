@@ -15,7 +15,8 @@ export default function Dashboard() {
 
   const newPatients = [
     { name: 'Jane Smith', registered: 'Today' },
-    { name: 'Robert Brown', registered: 'Today' }
+    { name: 'Robert Brown', registered: 'Today' },
+    { name: 'Danil Ouakli', registered: 'Today' }
   ];
 
   const hourlyData = [

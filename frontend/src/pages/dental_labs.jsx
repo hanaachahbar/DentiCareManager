@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/dental_labs.css';
 import { Search, Building, Pencil, Trash2 } from 'lucide-react';
+import LabWorkTypeForm from './add_labWorkType';
 
 export default function DentalLabs() {
   const [labs, setLabs] = useState([
@@ -43,6 +44,8 @@ export default function DentalLabs() {
     }
   ]);
 
+  const [showAddWorkForm, setShowAddWorkForm] = useState(false);
+
   const getStatusClass = (status) => {
     switch(status) {
       case 'Delivered': return 'status-delivered';
@@ -51,6 +54,23 @@ export default function DentalLabs() {
       default: return '';
     }
   };
+
+  function removeWork(labId, workId) {
+    setLabs(prevLabs =>
+      prevLabs.map(lab =>
+        lab.id === labId
+        ? {
+            ...lab,
+            workTypes: lab.workTypes.filter(work => work.id !== workId)
+          }
+        : lab
+      )
+    );
+  }
+
+  function removeLab(labId) {
+    setLabs(prev => prev.filter(prevLab => prevLab.id !== labId));
+  }
 
   return (
     <div className="dental-labs-container">
@@ -77,7 +97,10 @@ export default function DentalLabs() {
               <h2>{lab.name}</h2>
               <p className="contact">Contact: {lab.contact}</p>
             </div>
-            <button className="btn-add-work">+ Add New Work Type</button>
+            <div className="btns-for-lab">
+              <button className="btn-add-work" onClick={() => setShowAddWorkForm(true)}>+ Add New Work Type</button>
+              <button className='btn-remove-lab' onClick={() => removeLab(lab.id)}>Remove Lab</button>
+            </div> 
           </div>
 
           {lab.workTypes.length > 0 ? (
@@ -112,7 +135,7 @@ export default function DentalLabs() {
                           <button className="icon-btn">
                             <Pencil size={18} color='gray'></Pencil>
                           </button>
-                          <button className="icon-btn">
+                          <button className="icon-btn" onClick={() => removeWork(lab.id, workType.id)}>
                             <Trash2 size={18} color='gray'></Trash2>
                           </button>
                         </div>
@@ -133,6 +156,8 @@ export default function DentalLabs() {
           )}
         </div>
       ))}
+
+      { showAddWorkForm && <LabWorkTypeForm onClose={() => setShowAddWorkForm(false)}/> }
     </div>
   );
 }

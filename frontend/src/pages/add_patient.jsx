@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/add_patient.css';
-import { UserRound, CloudUpload, Bold, Plus, XCircle } from 'lucide-react';
+import { UserRound, CloudUpload, Bold, Plus, XCircle, File } from 'lucide-react';
 
 export default function AddPatient() {
   const [formData, setFormData] = useState({
@@ -332,6 +332,7 @@ export default function AddPatient() {
           <ul className="file-list">
             {uploadedFiles.map((file, i) => (
               <li key={i}>
+                <File/>
                 <p>{file.name}</p>
                 <button className='remove-file'
                   onClick={() => setUploadedFiles(prev => prev.filter((_, j) => j !== i))}

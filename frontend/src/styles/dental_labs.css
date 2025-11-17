@@ -99,8 +99,13 @@ body {
   font-size: 14px;
 }
 
-.btn-add-work {
-  background-color: rgba(62, 176, 247, 0.186);
+.btns-for-lab {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-add-work, .btn-remove-lab {
+  background-color: rgba(88, 186, 247, 0.186);
   color: #0d93dc;
   border: 1px solid #12a6e0;
   padding: 8px 16px;
@@ -111,8 +116,18 @@ body {
   transition: all 0.2s;
 }
 
+.btn-remove-lab {
+  background-color: rgba(247, 88, 88, 0.186);
+  color: #dc0d0d;
+  border: 1px solid #dc0d0d;
+}
+
 .btn-add-work:hover {
   background-color: #9fd2f19c;
+}
+
+.btn-remove-lab:hover {
+  background-color: #f19f9f9c;
 }
 
 .work-type-section {
