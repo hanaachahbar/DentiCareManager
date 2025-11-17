@@ -1,14 +1,15 @@
-import './App.css';
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import PaymentTracking from './pages/Payments';
+// frontend/src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Payments from './pages/Payments';
 
 function App() {
   return (
-    <HashRouter>
+    <Router>
       <Routes>
-        <Route path="/" element={<PaymentTracking />} />
+        <Route path="/payments" element={<Payments />} />
       </Routes>
-    </HashRouter>
+    </Router>
   );
 }
 
