@@ -1,16 +1,20 @@
-// frontend/src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Payments from './pages/Payments';
-import PatientList from './pages/PatientList';
+import PatientProfile from './pages/Patient_profile';
+import ODF from './pages/ODF';
+import AddServiceForm from './pages/AddServiceForm'; // Add this import
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/payments" element={<Payments />} />
-        <Route path="/patient-list" element={<PatientList />} />
-      </Routes>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<PatientProfile />} />
+          <Route path="/patient-profile" element={<PatientProfile />} />
+          <Route path="/odf" element={<ODF />} />
+          <Route path="/add-service" element={<AddServiceForm />} />
+        </Routes>
+      </div>
     </Router>
   );
 }
