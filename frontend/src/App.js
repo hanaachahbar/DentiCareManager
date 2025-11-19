@@ -1,24 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import PatientProfile from './pages/Patient_profile';
+import ODF from './pages/ODF';
+import AddServiceForm from './pages/AddServiceForm'; // Add this import
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<PatientProfile />} />
+          <Route path="/patient-profile" element={<PatientProfile />} />
+          <Route path="/odf" element={<ODF />} />
+          <Route path="/add-service" element={<AddServiceForm />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
