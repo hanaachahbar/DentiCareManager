@@ -1,0 +1,137 @@
+.blur-background {
+    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.102);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+
+.lab-form-section {
+    padding: 32px;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 15px;
+    z-index: 999;
+    min-width: 700px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.165);
+}
+
+.lab-form-section h2 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a1a1a;
+}
+
+.lab-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.lab-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.lab-form-group label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.lab-form-group input,
+.lab-form-group select,
+.lab-form-group textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.lab-form-group input:focus,
+.lab-form-group select:focus,
+.lab-form-group textarea:focus {
+    outline: none;
+    border-color: #2196f3;
+}
+
+.lab-form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.lab-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.lab-form-actions .btn-cancel,
+.lab-form-actions .btn-save {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.lab-form-actions .btn-cancel {
+    background: white;
+    color: #666;
+    border: 1px solid #d0d0d0;
+}
+
+.lab-form-actions .btn-cancel:hover {
+    background: #f5f5f5;
+}
+
+.lab-form-actions .btn-save {
+    background: #2196f3;
+    color: white;
+}
+
+.lab-form-actions .btn-save:hover {
+    background: #1976d2;
+}
+
+.error-msg {
+    color: red;
+    font-size: 15px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.personal-contact {
+    width: 48.5%;
+}
+
+@media (max-width: 868px) {
+    .lab-form-section {
+        padding: 20px;
+        min-width: 80%;
+    }
+
+    .lab-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .personal-contact {
+        width: 100%;
+    }
+}
