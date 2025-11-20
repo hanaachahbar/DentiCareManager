@@ -19,18 +19,6 @@ export default function Dashboard() {
     { name: 'Danil Ouakli', registered: 'Today' }
   ];
 
-  const hourlyData = [
-    { hour: '9am', count: 3 },
-    { hour: '10am', count: 2.8 },
-    { hour: '11am', count: 1 },
-    { hour: '12pm', count: 3.5 },
-    { hour: '1pm', count: 2.5 },
-    { hour: '2pm', count: 0.8 },
-    { hour: '3pm', count: 2 }
-  ];
-
-  const maxCount = Math.max(...hourlyData.map(d => d.count));
-
   return (
     <div className="dashboard">
       <header className="dashboard-header">
@@ -39,7 +27,6 @@ export default function Dashboard() {
       </header>
 
       <div className="dashboard-grid">
-        {/* Upcoming Appointments */}
         <section className="card appointments-card">
           <h2>Upcoming Appointments</h2>
           <div className="appointments-list">
@@ -60,7 +47,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Daily At a Glance */}
+
         <section className="card stats-card">
           <h2>Daily At a Glance</h2>
           
@@ -78,24 +65,8 @@ export default function Dashboard() {
             <div className="stat-label">Completed Treatments</div>
             <div className="stat-value">8</div>
           </div>
-
-          <div className="chart-section">
-            <h3>Appointments by Hour</h3>
-            <div className="bar-chart">
-              {hourlyData.map((data, idx) => (
-                <div key={idx} className="bar-container">
-                  <div 
-                    className="bar"
-                    style={{ height: `${(data.count / maxCount) * 100}%` }}
-                  ></div>
-                  <div className="bar-label">{data.hour}</div>
-                </div>
-              ))}
-            </div>
-          </div>
         </section>
 
-        {/* New Patient Registrations & Quick Actions */}
         <section className="card side-card">
           <h2>New Patient Registrations</h2>
           <div className="patients-list">

@@ -10,9 +10,27 @@ export default function AddPatient() {
     gender: '',
     phoneNumber: '',
     emailAddress: '',
+    city: '',
     Address: '',
+    emergencyCall: '',
+    notes: '',
     currentMedications: ''
   });
+
+  const cities = [
+    "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna",
+    "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira",
+    "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou",
+    "Algiers", "Djelfa", "Jijel", "Sétif", "Saïda",
+    "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine",
+    "Médéa", "Mostaganem", "M’Sila", "Mascara", "Ouargla",
+    "Oran", "El Bayadh", "Illizi", "Bordj Bou Arréridj", "Boumerdès",
+    "El Tarf", "Tindouf", "Tissemsilt", "El Oued", "Khenchela",
+    "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma",
+    "Aïn Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar",
+    "Ouled Djellal", "Béni Abbès", "In Salah", "In Guezzam", "Touggourt",
+    "Djanet", "El M’Ghair", "El Meniaa"
+  ];
 
   const [allergies, setAllergies] = useState([]);
   const [newAllergy, setNewAllergy] = useState('');
@@ -20,6 +38,8 @@ export default function AddPatient() {
   const [newCondition, setNewCondition] = useState('');
   const [hereditary, setHereditary] = useState([]);
   const [newHereditary, setNewHereditary] = useState('');
+
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,7 +86,7 @@ export default function AddPatient() {
   const [errors, setErrors] = useState({});
 
   function verifyInfo() {
-    const { firstName, lastName, dateOfBirth, gender, phoneNumber, emailAddress } = formData;
+    const { firstName, lastName, dateOfBirth, gender, phoneNumber, emailAddress, emergencyCall } = formData;
     let newErrors = {};
 
     if(!firstName.trim()) newErrors.firstName = "First name is required";
@@ -75,17 +95,20 @@ export default function AddPatient() {
     else if(isNaN(new Date(dateOfBirth).getTime()) || (new Date(dateOfBirth).getTime()) > Date.now())
       newErrors.dateOfBirth = "Please enter a valid date";
 
-    if(!gender) newErrors.gender = "Gender is required.";
+    if(!gender) newErrors.gender = "Gender is required";
 
     const phoneRegex = /^(?:\+213|0)(5|6|7)\d{8}$/;
     if(!phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
     else if(!phoneRegex.test(phoneNumber))
       newErrors.phoneNumber = "Invalid phone number format";
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if(!emailAddress.trim()) newErrors.emailAddress = "Email is required";
     else if(!emailRegex.test(emailAddress))
       newErrors.emailAddress = "Invalid email format";
+
+    if(emergencyCall && !phoneRegex.test(emergencyCall))
+      newErrors.emergencyCall = "Invalid phone number"
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -192,13 +215,86 @@ export default function AddPatient() {
           </div>
         </div>
 
+        <div className="form-row">
+          <div className="form-group">
+          <label>City</label>
+
+          <div className="city-autocomplete">
+            <input
+              type="text"
+              name="city"
+              placeholder="Type to search city..."
+              value={formData.city}
+              onChange={(e) => {
+                setFormData(prev => ({ ...prev, city: e.target.value }));
+                setShowCityDropdown(true);
+              }}
+              onFocus={() => setShowCityDropdown(true)}
+              className="city-input"
+            />
+            
+            {showCityDropdown && formData.city.length > 0 && (
+              <div className="city-dropdown">
+                {cities
+                  .filter(city =>
+                    city.toLowerCase().includes(formData.city.toLowerCase())
+                  )
+                  .slice(0, 7)
+                  .map((city, index) => (
+                    <div
+                      key={index}
+                      className="city-option"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, city }));
+                        setShowCityDropdown(false);
+                      }}
+                    >
+                      {city}
+                    </div>
+                  ))}
+
+                {cities.filter(city =>
+                  city.toLowerCase().includes(formData.city.toLowerCase())
+                ).length === 0 && (
+                  <div className="city-option no-match">No city found</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+
+          <div className="form-group">
+            <label>Address</label>
+            <input
+              name="Address"
+              placeholder="Enter address"
+              value={formData.Address}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
+
         <div className="form-group">
-          <label>Address</label>
+          <label>Emergency call</label>
           <input
-            name="Address"
-            placeholder="Enter address"
+            name="emergencyCall"
+            placeholder="Enter emergency call"
+            value={formData.emergencyCall}
+            onChange={handleInputChange}
+          />
+          {errors.emergencyCall && <div className="error-msg">{errors.emergencyCall}</div>}
+        </div>
+      </div>
+      
+      <div className="form-section">
+        <h2>Notes</h2>
+        <div className="form-group">
+          <textarea
+            name="notes"
+            placeholder="Write down some notes ..."
             rows="3"
-            value={formData.Address}
+            value={formData.notes}
             onChange={handleInputChange}
           />
         </div>
@@ -309,42 +405,6 @@ export default function AddPatient() {
         </div>
       </div>
 
-      <div className="form-section">
-        <h2>Upload documents</h2>
-
-        <div className="document-container" onClick={() => document.getElementById("fileUpload").click()}>
-            <div className="inside-upload">
-                <CloudUpload size={40} color='rgb(176, 176, 176, 0.8)'></CloudUpload>
-                <div className="title">Click to upload</div>
-                <div className="subtitle">svg, X-rays, previous medical records.</div>
-            </div>
-        </div>
-
-        <input
-            type="file"
-            id="fileUpload"
-            style={{ display: 'none' }}
-            multiple
-            onChange={(e) => setUploadedFiles(prev => [...prev, ...Array.from(e.target.files)])}
-        />
-
-        {uploadedFiles.length > 0 && (
-          <ul className="file-list">
-            {uploadedFiles.map((file, i) => (
-              <li key={i}>
-                <File/>
-                <p>{file.name}</p>
-                <button className='remove-file'
-                  onClick={() => setUploadedFiles(prev => prev.filter((_, j) => j !== i))}
-                >
-                  <XCircle color='red'/>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-      </div>
 
       <div className="form-actions">
         <button type="button" className="btn-cancel">Cancel</button>

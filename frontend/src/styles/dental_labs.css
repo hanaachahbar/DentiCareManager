@@ -154,7 +154,7 @@ body {
   color: #1a202c;
 }
 
-.btn-add-small {
+.btn-add-small, .btn-remove-small {
   background-color: #22c55e;
   color: white;
   border: none;
@@ -166,8 +166,16 @@ body {
   transition: background-color 0.2s;
 }
 
+.btn-remove-small {
+  background-color: #fe4848;
+}
+
 .btn-add-small:hover {
   background-color: #16a34a;
+}
+
+.btn-remove-small:hover {
+  background-color: #e42d2d;
 }
 
 .work-table {
@@ -262,6 +270,18 @@ body {
   font-size: 13px;
   color: #d1d5db;
 }
+
+.editing-input {
+  border-radius: 5px;
+  outline: none;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.107);
+}
+
+.editing-input:focus {
+  border: 1.5px solid rgb(120, 175, 251);
+}
+
 
 @media (max-width: 768px) {
   .header {

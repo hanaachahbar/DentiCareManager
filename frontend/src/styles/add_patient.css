@@ -195,8 +195,38 @@ body {
     background: #1976d2;
 }
 
+.city-autocomplete {
+  position: relative;
+}
 
-.document-container {
+.city-input {
+  width: 100%;
+  padding: 10px;
+}
+
+.city-dropdown {
+  position: absolute;
+  width: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 10;
+  margin-top: 3px;
+}
+
+.city-option {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.city-option:hover {
+  background: #f0f7ff;
+}
+
+
+/*.document-container {
     width: 100%;
     height: 250px;
     border: 2px solid rgba(227, 225, 225, 0.455);
@@ -225,7 +255,7 @@ body {
 .inside-upload .subtitle {
     font-size: 15px;
     color: rgb(176, 176, 176);
-}
+}*/
 
 .add-btn {
     display: flex;
