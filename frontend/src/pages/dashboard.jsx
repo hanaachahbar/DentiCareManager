@@ -83,7 +83,9 @@ export default function Dashboard() {
 
           <h2 style={{ marginTop: '40px' }}>Quick Actions</h2>
           <div className="quick-actions">
-            <button className="action-button primary" onClick={() => navigate('/add_patient')}>
+            <button className="action-button primary"
+             onClick={() => navigate('/add_patient')}
+            >
               <UserPlus/> Add New Patient
             </button>
             <button className="action-button secondary">
