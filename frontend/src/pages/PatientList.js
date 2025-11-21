@@ -169,10 +169,9 @@ const PatientList = () => {
   };
 
   return (
-    <div className="patient-list-page">
-
+    <div className="patient-list-page" style={{ display: 'block', width: '100%' }}>
       {/* Main Content */}
-      <main className="main-content">
+      <main className="main-content" style={{ display: 'block', width: '100%' }}>
         <h1 className="page-title">Patient List</h1>
 
         {/* Search and Add Patient */}
@@ -195,7 +194,7 @@ const PatientList = () => {
           </div>
           <button 
             className="add-patient-btn"
-            onClick={() => navigate('/add-patient')}
+            onClick={() => navigate('/add_patient')}
           >
             Add New Patient
           </button>
@@ -210,8 +209,8 @@ const PatientList = () => {
                 <th>DOB</th>
                 <th>CONTACT NUMBER</th>
                 <th>ALLERGIES</th>
-                <th>MALADIE CHRONIQUE</th>
-                <th>MALADIE HÉRÉDITAIRE</th>
+                <th>CHRONIC CONDITIONS</th>
+                <th>HEREDITARY CONDITIONS</th>
                 <th>LAST VISIT</th>
               </tr>
             </thead>

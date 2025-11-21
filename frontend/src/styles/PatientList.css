@@ -3,7 +3,7 @@
   padding: 0;
   box-sizing: border-box;
 }
-
+ 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -13,6 +13,14 @@ body {
 }
 
 .app-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* Patient List Page Container */
+.patient-list-page {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: #f9fafb;
 }
@@ -93,6 +101,7 @@ body {
 /* Main Content */
 .main-content {
   max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
@@ -109,13 +118,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .search-wrapper {
   position: relative;
   flex: 1;
   max-width: 450px;
+  min-width: 250px;
 }
 
 .search-icon {
@@ -151,7 +163,7 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-left: 1rem;
+  white-space: nowrap;
 }
 
 .add-patient-btn:hover {
@@ -313,11 +325,11 @@ body {
 
   .search-wrapper {
     max-width: 100%;
+    width: 100%;
   }
 
   .add-patient-btn {
     width: 100%;
-    margin-left: 0;
   }
 
   .table-container {
