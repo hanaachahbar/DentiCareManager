@@ -169,27 +169,7 @@ const PatientList = () => {
   };
 
   return (
-    <div className="app-container">
-      {/* Header */}
-      <header className="header">
-        <div className="header-content">
-          <div className="header-left">
-            <div className="logo">
-              <div className="logo-icon"></div>
-              <span className="logo-text">DentalPlus</span>
-            </div>
-            <nav className="nav">
-              <a href="#" className="nav-link">Dashboard</a>
-              <a href="#" className="nav-link active">Patients</a>
-              <a href="#" className="nav-link">Appointments</a>
-              <a href="#" className="nav-link">Payment</a>
-            </nav>
-          </div>
-          <div className="header-right">
-            <div className="user-avatar"></div>
-          </div>
-        </div>
-      </header>
+    <div className="patient-list-page">
 
       {/* Main Content */}
       <main className="main-content">
