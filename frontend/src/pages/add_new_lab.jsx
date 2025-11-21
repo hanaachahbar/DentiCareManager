@@ -117,8 +117,8 @@ export default function LabForm({onClose, onCreateLab}) {
                 </div>
 
                 <div className="lab-form-actions">
-                    <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
-                    <button type="button" className="btn-save" onClick={verifyLabDetails}>
+                    <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
+                    <button type="button" className="save-btn" onClick={verifyLabDetails}>
                     Add Lab
                     </button>
                 </div>

@@ -66,10 +66,10 @@ export default function WorkForm({ onClose, onCreateWork }) {
                 </div>
 
                 <div className="new-work-form-actions">
-                    <button type="button" className="btn-cancel" onClick={onClose}>
+                    <button type="button" className="cancel-btn" onClick={onClose}>
                         Cancel
                     </button>
-                    <button type="button" className="btn-save" onClick={verifyWorkDetails}>
+                    <button type="button" className="save-btn" onClick={verifyWorkDetails}>
                         Add Work
                     </button>
                 </div>
