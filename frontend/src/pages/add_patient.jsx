@@ -124,7 +124,7 @@ export default function AddPatient() {
 
   return (
     <div className="form-container">
-      <div className="form-header">
+      <div className="form-container-header">
         <div className="header-icon">
             <UserRound/>
         </div>
@@ -407,8 +407,8 @@ export default function AddPatient() {
 
 
       <div className="form-actions">
-        <button type="button" className="btn-cancel">Cancel</button>
-        <button type="button" className="btn-save" onClick={handleSubmit}>
+        <button type="button" className="cancel-btn">Cancel</button>
+        <button type="button" className="save-btn" onClick={handleSubmit}>
           Save Patient
         </button>
       </div>

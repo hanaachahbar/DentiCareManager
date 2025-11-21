@@ -81,8 +81,8 @@
     margin-top: 32px;
 }
 
-.new-work-form-actions .btn-cancel,
-.new-work-form-actions .btn-save {
+.new-work-form-actions .cancel-btn,
+.new-work-form-actions .save-btn {
     padding: 10px 24px;
     font-size: 14px;
     font-weight: 500;
@@ -92,22 +92,22 @@
     border: none;
 }
 
-.new-work-form-actions .btn-cancel {
+.new-work-form-actions .cancel-btn {
     background: white;
     color: #666;
     border: 1px solid #d0d0d0;
 }
 
-.new-work-form-actions .btn-cancel:hover {
+.new-work-form-actions .cancel-btn:hover {
     background: #f5f5f5;
 }
 
-.new-work-form-actions .btn-save {
+.new-work-form-actions .save-btn {
     background: #2196f3;
     color: white;
 }
 
-.new-work-form-actions .btn-save:hover {
+.new-work-form-actions .save-btn:hover {
     background: #1976d2;
 }
 

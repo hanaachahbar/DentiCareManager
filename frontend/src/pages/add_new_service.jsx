@@ -128,10 +128,10 @@ export default function ServiceForm({ onClose, onCreateService }) {
                 </div>
 
                 <div className="new-work-form-actions">
-                    <button type="button" className="btn-cancel" onClick={onClose}>
+                    <button type="button" className="cancel-btn" onClick={onClose}>
                         Cancel
                     </button>
-                    <button type="button" className="btn-save" onClick={verifyServiceDetails}>
+                    <button type="button" className="save-btn" onClick={verifyServiceDetails}>
                         Add Service
                     </button>
                 </div>

@@ -27,7 +27,7 @@ export default function Dashboard() {
       </header>
 
       <div className="dashboard-grid">
-        <section className="card appointments-card">
+        <section className="card dashboard-appointments-card">
           <h2>Upcoming Appointments</h2>
           <div className="appointments-list">
             {appointments.map(apt => (
@@ -83,15 +83,15 @@ export default function Dashboard() {
 
           <h2 style={{ marginTop: '40px' }}>Quick Actions</h2>
           <div className="quick-actions">
-            <button className="action-button primary"
+            <button className="dashboard-action-button primary"
              onClick={() => navigate('/add_patient')}
             >
               <UserPlus/> Add New Patient
             </button>
-            <button className="action-button secondary">
+            <button className="dashboard-action-button secondary">
               <CalendarPlus/> Schedule Appointment
             </button>
-            <button className="action-button secondary">
+            <button className="dashboard-action-button secondary">
               <ClipboardList/> Create Treatment Plan
             </button>
           </div>

@@ -244,7 +244,7 @@ body {
   margin-top: 16px;
 }
 
-.action-button {
+.dashboard-action-button {
   padding: 14px 20px;
   border-radius: 8px;
   border: none;
@@ -258,21 +258,21 @@ body {
   justify-content: center;
 }
 
-.action-button.primary {
+.dashboard-action-button.primary {
   background: #3b82f6;
   color: white;
 }
 
-.action-button.primary:hover {
+.dashboard-action-button.primary:hover {
   background: #2563eb;
 }
 
-.action-button.secondary {
+.dashboard-action-button.secondary {
   background: rgba(155, 200, 246, 0.274);
   color: #3b82f6;
 }
 
-.action-button.secondary:hover {
+.dashboard-action-button.secondary:hover {
   background: rgba(155, 200, 246, 0.474);
 }
 

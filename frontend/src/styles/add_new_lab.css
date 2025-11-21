@@ -80,8 +80,8 @@
     margin-top: 32px;
 }
 
-.lab-form-actions .btn-cancel,
-.lab-form-actions .btn-save {
+.lab-form-actions .cancel-btn,
+.lab-form-actions .save-btn {
     padding: 10px 24px;
     font-size: 14px;
     font-weight: 500;
@@ -91,22 +91,22 @@
     border: none;
 }
 
-.lab-form-actions .btn-cancel {
+.lab-form-actions .cancel-btn {
     background: white;
     color: #666;
     border: 1px solid #d0d0d0;
 }
 
-.lab-form-actions .btn-cancel:hover {
+.lab-form-actions .cancel-btn:hover {
     background: #f5f5f5;
 }
 
-.lab-form-actions .btn-save {
+.lab-form-actions .save-btn {
     background: #2196f3;
     color: white;
 }
 
-.lab-form-actions .btn-save:hover {
+.lab-form-actions .save-btn:hover {
     background: #1976d2;
 }
 
