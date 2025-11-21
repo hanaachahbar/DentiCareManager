@@ -278,17 +278,17 @@ export default function DentalLabs() {
 
   return (
     <div className="dental-labs-container">
-      <div className="header">
+      <div className="labs-header">
         <div>
           <h1>Dental Labs Management</h1>
           <p className="subtitle">Manage and track all outsourced work with partnered dental labs.</p>
         </div>
         <div className="header-actions">
           <Search className="w-5 h-5" size={18} color='gray' />
-          <input type="text" placeholder="Search labs, patients..." className="search-input"
+          <input type="text" placeholder="Search labs, patients..." className="dentalLab-search-input"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="btn-primary" onClick={() => setShowLabForm(true)}>+ Add New Lab</button>
+          <button className="dentalLab-btn-primary" onClick={() => setShowLabForm(true)}>+ Add New Lab</button>
         </div>
       </div>
 
