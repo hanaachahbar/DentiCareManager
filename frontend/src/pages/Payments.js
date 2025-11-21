@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import "../styles/Payments.css";
 import DeleteModal from "../components/DeleteModalInvoice";
-
+import  AddBillForm from "./Add_new_bill.jsx";
 const PaymentTracking = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -37,7 +37,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00123",
       date: "Oct 25, 2023",
       services: "Cleaning, X-Ray",
-      category: "General",
       totalCharge: 250.0,
       amountPaid: 250.0,
       outstanding: 0.0,
@@ -49,7 +48,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00122",
       date: "Oct 24, 2023",
       services: "Root Canal",
-      category: "ODF",
       totalCharge: 1200.0,
       amountPaid: 600.0,
       outstanding: 600.0,
@@ -61,7 +59,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00121",
       date: "Oct 22, 2023",
       services: "Crown Fitting",
-      category: "Restorative",
       totalCharge: 850.0,
       amountPaid: 0.0,
       outstanding: 850.0,
@@ -73,7 +70,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00120",
       date: "Oct 21, 2023",
       services: "Check-up",
-      category: "General",
       totalCharge: 100.0,
       amountPaid: 100.0,
       outstanding: 0.0,
@@ -204,11 +200,9 @@ const PaymentTracking = () => {
     );
   };
 
-  // Handle Edit action
   const handleEdit = (invoice) => {
-    // Navigate to edit page - replace '/edit-invoice' with your actual edit route
-    navigate(`/edit-invoice/${invoice.id}`, { state: { invoice } });
-    setActiveMenu(null); // Close the action menu
+    navigate('/add_bill', { state: { invoice } });
+    setActiveMenu(null); 
   };
 
   // Handle Delete action
@@ -477,7 +471,6 @@ const PaymentTracking = () => {
                 <th>Invoice #</th>
                 <th>Date</th>
                 <th>Services Rendered</th>
-                <th>Category</th>
                 <th>Total Charge</th>
                 <th>Amount Paid</th>
                 <th>Outstanding</th>
@@ -493,7 +486,6 @@ const PaymentTracking = () => {
                     <td className="invoice-number">{payment.invoiceNum}</td>
                     <td className="service-date">{payment.date}</td>
                     <td className="service-text">{payment.services}</td>
-                    <td className="service-category">{payment.category}</td>
                     <td className="amount-text">
                       {formatCurrency(payment.totalCharge)}
                     </td>
@@ -538,7 +530,7 @@ const PaymentTracking = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="10">
+                  <td colSpan="9">
                     <div className="empty-state">
                       <div className="empty-state-icon">
                         <Search size={48} />
