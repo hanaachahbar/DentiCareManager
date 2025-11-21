@@ -6,7 +6,7 @@ function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<PaymentTracking />} />
+        <Route path="/payment" element={<PaymentTracking />} />
       </Routes>
     </HashRouter>
   );
