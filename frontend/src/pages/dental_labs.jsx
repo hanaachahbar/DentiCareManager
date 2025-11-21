@@ -252,6 +252,29 @@ export default function DentalLabs() {
   const [currentLabId, setCurrentLabId] = useState(null);
   const [currentServiceId, setCurrentServiceId] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const term = searchTerm.toLowerCase();
+  const filteredLabs = labs
+    .map(lab => {
+      const matchesLab = lab.name.toLowerCase().includes(term);
+      const filteredServices = lab.services.filter(service =>
+        service.patient.toLowerCase().includes(term)
+      );
+      if (matchesLab) {
+        return lab;
+      }
+      if (filteredServices.length > 0) {
+        return {
+          ...lab,
+          services: filteredServices
+        };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+
+
 
   return (
     <div className="dental-labs-container">
@@ -262,12 +285,14 @@ export default function DentalLabs() {
         </div>
         <div className="header-actions">
           <Search className="w-5 h-5" size={18} color='gray' />
-          <input type="text" placeholder="Search labs..." className="search-input" />
+          <input type="text" placeholder="Search labs, patients..." className="search-input"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <button className="btn-primary" onClick={() => setShowLabForm(true)}>+ Add New Lab</button>
         </div>
       </div>
 
-      {labs.map(lab => (
+      {filteredLabs.map(lab => (
         <div key={lab.id} className="lab-card">
           <div className="lab-header">
             <div>
