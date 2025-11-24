@@ -181,7 +181,7 @@ body {
 
 .grid-layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 35% 65%;
   gap: 2rem;
   align-items: start;
 }
@@ -205,6 +205,7 @@ body {
   flex-direction: column;
   gap: 1.5rem;
 }
+
 .card {
   background-color: white;
   border: 1px solid var(--border-color);
@@ -423,6 +424,33 @@ body {
   color: #DC2626;
 }
 
+.badge-inactive {
+  background-color: #9ca3af;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-warning {
+  background-color: #fbbf24;
+  color: #78350f;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-danger {
+  background-color: #ef4444;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* ----------------------------- */
 /*      TREATMENT SECTIONS       */
 /* ----------------------------- */
@@ -482,6 +510,88 @@ body {
 
 .link-button:hover {
   text-decoration: underline;
+}
+
+/* ----------------------------- */
+/*    APPOINTMENT CARD STYLES    */
+/* ----------------------------- */
+
+.appointment-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #f9fafb;
+}
+
+.appointment-card .appointment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 0;
+  border-top: none;
+}
+
+.appointment-prescriptions,
+.appointment-documents {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.prescription-subtitle,
+.document-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #374151;
+}
+
+/* Document List Styles */
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.document-icon {
+  font-size: 24px;
+}
+
+.document-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.document-name {
+  font-weight: 500;
+  color: #111827;
+  font-size: 14px;
+}
+
+.document-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.no-data {
+  color: #9ca3af;
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
 }
 
 /* ----------------------------- */

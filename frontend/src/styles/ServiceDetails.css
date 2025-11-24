@@ -586,6 +586,31 @@ body {
   display: flex;
   gap: 8px;
 }
+.payment-info {
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
 
+.status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
 
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
 
+.status-in-progress {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-unpayed {
+  background-color: #f8d7da;
+  color: #721c24;
+}
