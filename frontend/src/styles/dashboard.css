@@ -63,7 +63,7 @@ body {
   gap: 16px;
 }
 
-.appointment-item {
+.dashboard-appointment-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -73,13 +73,13 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.appointment-left {
+.dashboard-appointment-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.avatar {
+.appoint-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -92,7 +92,7 @@ body {
   font-size: 14px;
 }
 
-.appointment-details {
+.dashboard-appointment-details {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -126,7 +126,7 @@ body {
 }
 
 /* Stats Section */
-.stat-item {
+.dashboard-stat-item {
   margin-bottom: 20px;
   background-color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

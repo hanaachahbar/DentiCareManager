@@ -43,10 +43,10 @@ export default function Dashboard() {
           <h2>Upcoming Appointments</h2>
           <div className="appointments-list">
             {appointments.map(apt => (
-              <div key={apt.id} className="appointment-item">
-                <div className="appointment-left">
-                  <div className="avatar">{apt.initials}</div>
-                  <div className="appointment-details">
+              <div key={apt.id} className="dashboard-appointment-item">
+                <div className="dashboard-appointment-left">
+                  <div className="appoint-avatar">{apt.initials}</div>
+                  <div className="dashboard-appointment-details">
                     <div className="patient-name">{apt.name}</div>
                     <div className="appointment-time">{apt.time} - {apt.type}</div>
                   </div>
@@ -63,17 +63,17 @@ export default function Dashboard() {
         <section className="card-dashboard stats-card">
           <h2>Daily At a Glance</h2>
           
-          <div className="stat-item">
+          <div className="dashboard-stat-item">
             <div className="stat-label">Total Appointments</div>
             <div className="stat-value">12</div>
           </div>
 
-          <div className="stat-item">
+          <div className="dashboard-stat-item">
             <div className="stat-label">Today's Revenue</div>
             <div className="stat-value">$1,500</div>
           </div>
 
-          <div className="stat-item">
+          <div className="dashboard-stat-item">
             <div className="stat-label">Completed Treatments</div>
             <div className="stat-value">8</div>
           </div>
