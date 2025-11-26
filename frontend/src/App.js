@@ -1,18 +1,22 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Navbar from './components/navbar/navbar';
+import Navbar from "./components/navbar/navbar"; // Only if Navbar.js exists
 
-import Dashboard from './pages/dashboard.jsx';
-import AddPatient from './pages/add_patient.jsx';
-import DentalLabs from './pages/dental_labs.jsx';
-import Payments from './pages/Payments';
-import PatientList from './pages/PatientList';
-import MedicamentsDrugList from './pages/MedicamentsDrugList';
-import AppointmentsMainPage from './pages/Appointment.jsx'; 
-import AddAppointmentPage from './pages/AddAppointement.jsx';
-import EmergencyReschedule2 from './pages/EmergencyReschedule.jsx';
-import AddBillForm from './pages/Add_new_bill.jsx'; 
+import Dashboard from "./pages/dashboard";
+import AddPatient from "./pages/add_patient";
+import DentalLabs from "./pages/dental_labs";
+import Payments from "./pages/Payments";
+import PatientList from "./pages/PatientList";
+import MedicamentsDrugList from "./pages/MedicamentsDrugList";
+import AppointmentsMainPage from "./pages/Appointment";
+import AddAppointmentPage from "./pages/AddAppointement";
+import EmergencyReschedule2 from "./pages/EmergencyReschedule";
+import AddBillForm from "./pages/Add_new_bill";
+
+import PatientProfile from "./pages/Patient_profile";
+import ODF from "./pages/ServiceDetails";
+import AddServiceForm from "./pages/AddServiceForm";
 
 function App() {
   return (
@@ -21,6 +25,11 @@ function App() {
 
       <div style={{ padding: "20px" }}>
         <Routes>
+          <Route path="/patient_profile" element={<PatientProfile />} />
+
+
+          <Route path="/service-details" element={<ODF />} />
+          <Route path="/add-service" element={<AddServiceForm />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/add_patient" element={<AddPatient />} />
           <Route path="/dental_labs" element={<DentalLabs />} />
