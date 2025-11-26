@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import "../styles/Payments.css";
 import DeleteModal from "../components/DeleteModalInvoice";
-
+import  AddBillForm from "./Add_new_bill.jsx";
 const PaymentTracking = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -37,7 +37,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00123",
       date: "Oct 25, 2023",
       services: "Cleaning, X-Ray",
-      category: "General",
       totalCharge: 250.0,
       amountPaid: 250.0,
       outstanding: 0.0,
@@ -49,7 +48,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00122",
       date: "Oct 24, 2023",
       services: "Root Canal",
-      category: "ODF",
       totalCharge: 1200.0,
       amountPaid: 600.0,
       outstanding: 600.0,
@@ -61,7 +59,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00121",
       date: "Oct 22, 2023",
       services: "Crown Fitting",
-      category: "Restorative",
       totalCharge: 850.0,
       amountPaid: 0.0,
       outstanding: 850.0,
@@ -73,7 +70,6 @@ const PaymentTracking = () => {
       invoiceNum: "INV-00120",
       date: "Oct 21, 2023",
       services: "Check-up",
-      category: "General",
       totalCharge: 100.0,
       amountPaid: 100.0,
       outstanding: 0.0,
@@ -204,11 +200,9 @@ const PaymentTracking = () => {
     );
   };
 
-  // Handle Edit action
   const handleEdit = (invoice) => {
-    // Navigate to edit page - replace '/edit-invoice' with your actual edit route
-    navigate(`/edit-invoice/${invoice.id}`, { state: { invoice } });
-    setActiveMenu(null); // Close the action menu
+    navigate('/add_bill', { state: { invoice } });
+    setActiveMenu(null); 
   };
 
   // Handle Delete action
@@ -343,71 +337,7 @@ const PaymentTracking = () => {
   };
 
   return (
-    <div className="payments-container">
-      {/* Header */}
-      <header className="payments-header">
-        <div className="payments-header-content">
-          <div className="payments-nav">
-            <div className="logo-container">
-              <div className="logo-icon">
-                <DollarSign size={24} color="white" />
-              </div>
-              <span className="logo-text">DentalDash</span>
-            </div>
-            <nav>
-              <ul className="nav-links">
-                <li>
-                  <a href="#" className="nav-link">
-                    Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="nav-link">
-                    Patients
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="nav-link">
-                    Appointments
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="nav-link active">
-                    Billing
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-          <div className="header-actions">
-            <button className="notification-btn" aria-label="Notifications">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15 6.66667C15 5.34058 14.4732 4.06881 13.5355 3.13113C12.5979 2.19345 11.3261 1.66667 10 1.66667C8.67392 1.66667 7.40215 2.19345 6.46447 3.13113C5.52678 4.06881 5 5.34058 5 6.66667C5 12.5 2.5 14.1667 2.5 14.1667H17.5C17.5 14.1667 15 12.5 15 6.66667Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M11.4417 17.5C11.2952 17.7526 11.0849 17.9622 10.8319 18.1079C10.5789 18.2537 10.292 18.3304 10 18.3304C9.70802 18.3304 9.42115 18.2537 9.16813 18.1079C8.91511 17.9622 8.70484 17.7526 8.55835 17.5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <div className="profile-avatar"></div>
-          </div>
-        </div>
-      </header>
+    <div className="payments-page">
 
       {/* Main Content */}
       <main className="payments-main">
@@ -541,7 +471,6 @@ const PaymentTracking = () => {
                 <th>Invoice #</th>
                 <th>Date</th>
                 <th>Services Rendered</th>
-                <th>Category</th>
                 <th>Total Charge</th>
                 <th>Amount Paid</th>
                 <th>Outstanding</th>
@@ -557,7 +486,6 @@ const PaymentTracking = () => {
                     <td className="invoice-number">{payment.invoiceNum}</td>
                     <td className="service-date">{payment.date}</td>
                     <td className="service-text">{payment.services}</td>
-                    <td className="service-category">{payment.category}</td>
                     <td className="amount-text">
                       {formatCurrency(payment.totalCharge)}
                     </td>
@@ -602,7 +530,7 @@ const PaymentTracking = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="10">
+                  <td colSpan="9">
                     <div className="empty-state">
                       <div className="empty-state-icon">
                         <Search size={48} />
