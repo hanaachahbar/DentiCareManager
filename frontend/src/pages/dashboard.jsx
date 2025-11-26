@@ -19,15 +19,27 @@ export default function Dashboard() {
     { name: 'Danil Ouakli', registered: 'Today' }
   ];
 
+  function getFullFormattedDate() {
+    const date = new Date();
+    const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' });
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const suffix =
+      day % 10 === 1 && day !== 11 ? "st" :
+      day % 10 === 2 && day !== 12 ? "nd" :
+      day % 10 === 3 && day !== 13 ? "rd" : "th";
+    return `${dayOfWeek}, ${day}${suffix} ${month}`;
+  }
+
   return (
     <div className="dashboard">
       <header className="dashboard-header">
         <h1>Welcome, Dr. Amelia</h1>
-        <p>Here's your dashboard for today, Monday, 24th July.</p>
+        <p>Here's your dashboard for today, {getFullFormattedDate()}.</p>
       </header>
 
       <div className="dashboard-grid">
-        <section className="card dashboard-appointments-card">
+        <section className="card-dashboard dashboard-appointments-card">
           <h2>Upcoming Appointments</h2>
           <div className="appointments-list">
             {appointments.map(apt => (
@@ -48,7 +60,7 @@ export default function Dashboard() {
         </section>
 
 
-        <section className="card stats-card">
+        <section className="card-dashboard stats-card">
           <h2>Daily At a Glance</h2>
           
           <div className="stat-item">
@@ -67,7 +79,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <section className="card side-card">
+        <section className="card-dashboard side-card">
           <h2>New Patient Registrations</h2>
           <div className="patients-list">
             {newPatients.map((patient, idx) => (
@@ -76,7 +88,7 @@ export default function Dashboard() {
                   <div className="patient-name">{patient.name}</div>
                   <div className="registered-date">Registered: {patient.registered}</div>
                 </div>
-                <button className="link-button">View Profile</button>
+                <button className="link-button-dashboard">View Profile</button>
               </div>
             ))}
           </div>
@@ -88,12 +100,16 @@ export default function Dashboard() {
             >
               <UserPlus/> Add New Patient
             </button>
-            <button className="dashboard-action-button secondary">
+            <button className="dashboard-action-button secondary"
+              onClick={() => navigate('/appointments')}
+            >
               <CalendarPlus/> Schedule Appointment
             </button>
-            <button className="dashboard-action-button secondary">
+            {/*<button className="dashboard-action-button secondary"
+              onClick={() => navigate('')}
+            >
               <ClipboardList/> Create Treatment Plan
-            </button>
+            </button>*/}
           </div>
         </section>
       </div>
