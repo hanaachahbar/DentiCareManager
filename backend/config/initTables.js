@@ -36,3 +36,38 @@ const initializeTables = () => {
 
 module.exports = initializeTables;
 
+/*
+
+module.exports = function initializeTables(db) {
+  // Create patients table
+  const createPatientsTable = `
+    CREATE TABLE IF NOT EXISTS patients (
+      patient_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      date_of_birth TEXT,
+      gender TEXT,
+      phone_number TEXT,
+      emergency_call TEXT,
+      email TEXT,
+      address TEXT,
+      city TEXT,
+      notes TEXT,
+      allergies TEXT,
+      chronic_conditions TEXT,
+      hereditary_conditions TEXT,
+      current_medications TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `;
+
+  try {
+    db.prepare(createPatientsTable).run();
+    console.log("✓ Patients table ready");
+  } catch (err) {
+    console.error("Error creating patients table:", err);
+  }
+};
+
+
+*/

@@ -1,5 +1,3 @@
-const db = require("../config/db");
-
 // GET all patients
 exports.getPatients = (req, res) => {
   db.query("SELECT * FROM patients ORDER BY created_at DESC", (err, results) => {
