@@ -9,19 +9,18 @@ const {
 } = require("../controllers/patientsController");
 
 // GET all patients
-router.get("/", getPatients);
+router.get("/addPatient", getPatients);
 
 // GET patient by ID
-router.get("/:id", getPatientById);
+router.get("/addPatient/:id", getPatientById);
 
 // POST create new patient
-router.post("/", addPatient);
+router.post("/addPatient", addPatient);
 
 // PUT update patient
-router.put("/:id", updatePatient);
+router.put("/addPatient/:id", updatePatient);
 
 // DELETE patient
-router.delete("/:id", deletePatient);
+router.delete("/addPatient/:id", deletePatient);
 
 module.exports = router;
-
