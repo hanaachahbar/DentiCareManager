@@ -30,7 +30,7 @@ export default function AddPatient() {
     "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma",
     "Aïn Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar",
     "Ouled Djellal", "Béni Abbès", "In Salah", "In Guezzam", "Touggourt",
-    "Djanet", "El M’Ghair", "El Meniaa"
+    "Djanet", "El M’Ghair", "El Meniaa", "Maghnia"
   ];
 
   const [allergies, setAllergies] = useState([]);
@@ -120,7 +120,7 @@ export default function AddPatient() {
       //console.log('Form submitted:', { ...formData, allergies, chronicConditions, hereditary });
       const patientData = { ...formData, allergies, chronicConditions, hereditary };
       try {
-        const response = await axios.post('http://localhost:5000/api/patients/addPatient', patientData);
+        const response = await axios.post('http://localhost:5000/api/patients', patientData);
         if(response.data.status) {
           console.log(response.data.patient_data);
         }
