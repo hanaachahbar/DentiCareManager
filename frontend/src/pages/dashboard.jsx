@@ -1,23 +1,59 @@
 import '../styles/dashboard.css';
-import { UserPlus, CalendarPlus, ClipboardList } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { UserPlus, CalendarPlus, ClipboardList, List } from 'lucide-react';
+import { data, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
   const appointments = [
-    { id: 1, name: 'John Doe', time: '10:30 AM', type: 'Routine Check-up', status: 'Checked-in', initials: 'JD' },
-    { id: 2, name: 'Lisa Smith', time: '11:00 AM', type: 'Filling', status: 'Pending', initials: 'LS' },
-    { id: 3, name: 'Michael Johnson', time: '12:15 PM', type: 'Teeth Whitening', status: 'Pending', initials: 'MJ' },
-    { id: 4, name: 'Emily Williams', time: '2:00 PM', type: 'Consultation', status: 'Pending', initials: 'EW' },
-    { id: 5, name: 'Chris Brown', time: '3:30 PM', type: 'Root Canal', status: 'Pending', initials: 'CB' }
+    { id: 1, name: 'John Doe', time: '10:30 AM', type: 'Routine Check-up', status: 'Checked-in', initials: getInitials('John Doe') },
+    { id: 2, name: 'Lisa Smith', time: '11:00 AM', type: 'Filling', status: 'Pending', initials: getInitials("Lisa Smith") },
+    { id: 3, name: 'Michael Johnson', time: '12:15 PM', type: 'Teeth Whitening', status: 'Pending', initials: getInitials("Michael Johnson") },
+    { id: 4, name: 'Emily Williams', time: '2:00 PM', type: 'Consultation', status: 'Pending', initials: getInitials('Emily Williams') },
+    { id: 5, name: 'Chris Brown', time: '3:30 PM', type: 'Root Canal', status: 'Pending', initials: getInitials('Chris Brown') }
   ];
 
-  const newPatients = [
+  function getInitials(name) {
+    var initial = '';
+    for(var i=0; i<name.length; i++) {
+      if(i==0) initial += name[i].toUpperCase();
+      if(name[i] == ' ') return initial + name[i+1].toUpperCase();
+    }
+  }
+
+  /*var newPatients = [
     { name: 'Jane Smith', registered: 'Today' },
     { name: 'Robert Brown', registered: 'Today' },
     { name: 'Danil Ouakli', registered: 'Today' }
-  ];
+  ];*/
+
+  const [newPatients, setNewPatients] = useState([]);
+
+  async function getNewPatients() {
+    try {
+      const response = await axios.get('http://localhost:5000/api/patients');
+      console.log(response.data);
+      const max_length = (response.data.length < 5) ? response.data.length: 5;
+      var patient_list = [];
+      for(var i=0; i<max_length; i++) {
+        const patient = response.data[i];
+        patient_list.push(
+          {name: patient['first_name'] + ' ' +  patient['last_name'], registered: 'Today'}
+        );
+      }
+      setNewPatients(patient_list);
+
+    }
+    catch(error) {
+      console.log("Error:", error);
+    }
+  }
+
+  useEffect(() => {
+    getNewPatients();
+  }, []);
 
   function getFullFormattedDate() {
     const date = new Date();

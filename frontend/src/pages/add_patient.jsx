@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/add_patient.css';
 import { UserRound, CloudUpload, Bold, Plus, XCircle, File } from 'lucide-react';
+import axios from 'axios';
 
 export default function AddPatient() {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ export default function AddPatient() {
     "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma",
     "Aïn Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar",
     "Ouled Djellal", "Béni Abbès", "In Salah", "In Guezzam", "Touggourt",
-    "Djanet", "El M’Ghair", "El Meniaa"
+    "Djanet", "El M’Ghair", "El Meniaa", "Maghnia"
   ];
 
   const [allergies, setAllergies] = useState([]);
@@ -82,7 +83,6 @@ export default function AddPatient() {
     }
   };
 
-  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [errors, setErrors] = useState({});
 
   function verifyInfo() {
@@ -115,10 +115,20 @@ export default function AddPatient() {
   }
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if(verifyInfo()) {
-      console.log('Form submitted:', { ...formData, allergies, chronicConditions, hereditary });
-      alert('Patient saved successfully!');
+      //console.log('Form submitted:', { ...formData, allergies, chronicConditions, hereditary });
+      const patientData = { ...formData, allergies, chronicConditions, hereditary };
+      try {
+        const response = await axios.post('http://localhost:5000/api/patients', patientData);
+        if(response.data.status) {
+          console.log(response.data.patient_data);
+        }
+        alert('Patient saved successfully!');
+      }
+      catch(error) {
+        console.log("From server: ", error);
+      }
     }
   };
 

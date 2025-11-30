@@ -24,4 +24,3 @@ router.put("/:id", updatePatient);
 router.delete("/:id", deletePatient);
 
 module.exports = router;
-
