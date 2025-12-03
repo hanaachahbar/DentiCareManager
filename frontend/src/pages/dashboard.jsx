@@ -124,7 +124,9 @@ export default function Dashboard() {
                   <div className="patient-name">{patient.name}</div>
                   <div className="registered-date">Registered: {patient.registered}</div>
                 </div>
-                <button className="link-button-dashboard">View Profile</button>
+                <button className="link-button-dashboard"
+                  onClick={() => navigate('/patient_profile')}
+                >View Profile</button>
               </div>
             ))}
           </div>
