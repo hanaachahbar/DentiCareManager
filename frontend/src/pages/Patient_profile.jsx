@@ -241,9 +241,6 @@ function Patient_profile() {
             <div className="page-header">
               <h1 className="page-title">Patient Profile</h1>
               <div className="header-actions">
-                <button className="btn btn-primary">
-                  <span>+</span>
-                </button>
                 <button className="btn btn-secondary" onClick={handleAddNewService}>
                   <span className="icon">+</span>
                   <span>Add New Service</span>
@@ -337,8 +334,53 @@ function Patient_profile() {
 
                   </div>
                 </div>
+                {/* Payment History */}
+                <div className="card">
+                  <div className="card-header">
+                    <h3 className="card-title">Payment History</h3>
+                    <div className="search-box">
+                      <span className="search-icon">🔍</span>
+                      <input className="search-input" placeholder="Filter payments..." type="text"/>
+                    </div>
+                  </div>
+                  <div className="table-container">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Invoice ID</th>
+                          <th>Date</th>
+                          <th>Category</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>INV-00123</td>
+                          <td>12-05-2023</td>
+                          <td>Whitening</td>
+                          <td>$150.00</td>
+                          <td><span className="badge badge-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td>INV-00115</td>
+                          <td>25-01-2023</td>
+                          <td>General</td>
+                          <td>$75.00</td>
+                          <td><span className="badge badge-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td>INV-00109</td>
+                          <td>02-11-2022</td>
+                          <td>ODF</td>
+                          <td>$220.00</td>
+                          <td><span className="badge badge-overdue">Overdue</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
-
               {/* Main Content Area */}
               <div className="main-area">
                 {/* Services Section - Each service has its own card */}
@@ -403,7 +445,6 @@ function Patient_profile() {
                                   </div>
                                 </div>
                               )}
-
                               {/* Documents for this appointment */}
                               {appointment.documents && appointment.documents.length > 0 && (
                                 <div className="appointment-documents">
@@ -431,57 +472,7 @@ function Patient_profile() {
                     </div>
                   </div>
                 ))}
-
-                {/* Payment History */}
-                <div className="card">
-                  <div className="card-header">
-                    <h3 className="card-title">Payment History</h3>
-                    <div className="search-box">
-                      <span className="search-icon">🔍</span>
-                      <input className="search-input" placeholder="Filter payments..." type="text"/>
-                    </div>
-                  </div>
-                  <div className="table-container">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>Invoice ID</th>
-                          <th>Date</th>
-                          <th>Category</th>
-                          <th>Amount</th>
-                          <th>Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>INV-00123</td>
-                          <td>12-05-2023</td>
-                          <td>Whitening</td>
-                          <td>$150.00</td>
-                          <td><span className="badge badge-paid">Paid</span></td>
-                          <td><a className="link" href="#">View</a></td>
-                        </tr>
-                        <tr>
-                          <td>INV-00115</td>
-                          <td>25-01-2023</td>
-                          <td>General</td>
-                          <td>$75.00</td>
-                          <td><span className="badge badge-paid">Paid</span></td>
-                          <td><a className="link" href="#">View</a></td>
-                        </tr>
-                        <tr>
-                          <td>INV-00109</td>
-                          <td>02-11-2022</td>
-                          <td>ODF</td>
-                          <td>$220.00</td>
-                          <td><span className="badge badge-overdue">Overdue</span></td>
-                          <td><a className="link" href="#">View</a></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                
               </div>
             </div>
           </div>

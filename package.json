@@ -4,7 +4,8 @@
   "description": "Dentist Management System Desktop App using React + Electron",
   "main": "electron/main.js",
   "scripts": {
-    "start": "concurrently \"npm run start-react\" \"wait-on http://localhost:3000 && electron .\"",
+    "backend": "node backend/server.js",
+    "start": "concurrently \"npm run backend\" \"npm run start-react\" \"wait-on http://localhost:3000 && electron .\"",
     "start-react": "npm start --prefix frontend",
     "build": "npm run build --prefix frontend",
     "electron": "electron .",

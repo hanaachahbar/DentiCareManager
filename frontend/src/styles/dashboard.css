@@ -37,19 +37,19 @@ body {
   gap: 24px;
 }
 
-.card {
+.card-dashboard {
   background: transparent;
   border-radius: 12px;
   padding: 24px;
 }
 
-.card h2 {
+.card-dashboard h2 {
   font-size: 22px;
   font-weight: bolder;
   margin-bottom: 20px;
 }
 
-.card h3 {
+.card-dashboard h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
@@ -63,7 +63,7 @@ body {
   gap: 16px;
 }
 
-.appointment-item {
+.dashboard-appointment-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -73,13 +73,13 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.appointment-left {
+.dashboard-appointment-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.avatar {
+.appoint-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -92,7 +92,7 @@ body {
   font-size: 14px;
 }
 
-.appointment-details {
+.dashboard-appointment-details {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -126,7 +126,7 @@ body {
 }
 
 /* Stats Section */
-.stat-item {
+.dashboard-stat-item {
   margin-bottom: 20px;
   background-color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -219,7 +219,7 @@ body {
   margin-top: 4px;
 }
 
-.link-button {
+.link-button-dashboard {
   color: #3b82f6;
   background: none;
   border: none;
@@ -231,7 +231,7 @@ body {
   border-radius: 15px;
 }
 
-.link-button:hover {
+.link-button-dashboard:hover {
   color: rgb(39, 101, 247);
   background-color: rgba(112, 180, 249, 0.384);
 }

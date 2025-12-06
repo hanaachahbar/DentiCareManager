@@ -78,15 +78,6 @@ const AddServiceForm = () => {
         {/* Main Content */}
         <main className="main-content">
           <div className="form-wrapper">
-            {/* Breadcrumb */}
-            <div className="breadcrumb">
-              <a href="#" onClick={handleCancel}>Patients</a>
-              <span>/</span>
-              <a href="#" onClick={handleCancel}>{patientData.name}</a>
-              <span>/</span>
-              <span className="current">Add New Service</span>
-            </div>
-
             {/* Form Card */}
             <div className="form-card">
               <div className="form-header">

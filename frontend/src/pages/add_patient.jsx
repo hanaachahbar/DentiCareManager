@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/add_patient.css';
 import { UserRound, CloudUpload, Bold, Plus, XCircle, File } from 'lucide-react';
+import axios from 'axios';
 
 export default function AddPatient() {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ export default function AddPatient() {
     "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma",
     "Aïn Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar",
     "Ouled Djellal", "Béni Abbès", "In Salah", "In Guezzam", "Touggourt",
-    "Djanet", "El M’Ghair", "El Meniaa"
+    "Djanet", "El M’Ghair", "El Meniaa", "Maghnia"
   ];
 
   const [allergies, setAllergies] = useState([]);
@@ -82,7 +83,6 @@ export default function AddPatient() {
     }
   };
 
-  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [errors, setErrors] = useState({});
 
   function verifyInfo() {
@@ -115,10 +115,20 @@ export default function AddPatient() {
   }
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if(verifyInfo()) {
-      console.log('Form submitted:', { ...formData, allergies, chronicConditions, hereditary });
-      alert('Patient saved successfully!');
+      //console.log('Form submitted:', { ...formData, allergies, chronicConditions, hereditary });
+      const patientData = { ...formData, allergies, chronicConditions, hereditary };
+      try {
+        const response = await axios.post('http://localhost:5000/api/patients', patientData);
+        if(response.data.status) {
+          console.log(response.data.patient_data);
+        }
+        alert('Patient saved successfully!');
+      }
+      catch(error) {
+        console.log("From server: ", error);
+      }
     }
   };
 
@@ -134,10 +144,10 @@ export default function AddPatient() {
         </div>
       </div>
 
-      <div className="form-section">
+      <div className="form-container-section">
         <h2>Personal Details</h2>
-        <div className="form-row">
-          <div className="form-group">
+        <div className="form-section-row">
+          <div className="form-section-group">
             <label>First Name</label>
             <input
               type="text"
@@ -148,7 +158,7 @@ export default function AddPatient() {
             />
             {errors.firstName && <div className="error-msg">{errors.firstName}</div> }
           </div>
-          <div className="form-group">
+          <div className="form-section-group">
             <label>Last Name</label>
             <input
               type="text"
@@ -161,8 +171,8 @@ export default function AddPatient() {
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
+        <div className="form-section-row">
+          <div className="form-section-group">
             <label>Date of Birth</label>
             <input
               type="date"
@@ -172,7 +182,7 @@ export default function AddPatient() {
             />
             {errors.dateOfBirth && <div className="error-msg">{errors.dateOfBirth}</div> }
           </div>
-          <div className="form-group">
+          <div className="form-section-group">
             <label>Gender</label>
             <select
               name="gender"
@@ -188,10 +198,10 @@ export default function AddPatient() {
         </div>
       </div>
 
-      <div className="form-section">
+      <div className="form-container-section">
         <h2>Contact Information</h2>
-        <div className="form-row">
-          <div className="form-group">
+        <div className="form-section-row">
+          <div className="form-section-group">
             <label>Phone Number</label>
             <input
               type="tel"
@@ -202,7 +212,7 @@ export default function AddPatient() {
             />
             {errors.phoneNumber && <div className="error-msg">{errors.phoneNumber}</div> }
           </div>
-          <div className="form-group">
+          <div className="form-section-group">
             <label>Email Address</label>
             <input
               type="email"
@@ -215,8 +225,8 @@ export default function AddPatient() {
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
+        <div className="form-section-row">
+          <div className="form-section-group">
           <label>City</label>
 
           <div className="city-autocomplete">
@@ -264,7 +274,7 @@ export default function AddPatient() {
         </div>
 
 
-          <div className="form-group">
+          <div className="form-section-group">
             <label>Address</label>
             <input
               name="Address"
@@ -275,7 +285,7 @@ export default function AddPatient() {
           </div>
         </div>
 
-        <div className="form-group">
+        <div className="form-section-group">
           <label>Emergency call</label>
           <input
             name="emergencyCall"
@@ -287,9 +297,9 @@ export default function AddPatient() {
         </div>
       </div>
       
-      <div className="form-section">
+      <div className="form-container-section">
         <h2>Notes</h2>
-        <div className="form-group">
+        <div className="form-section-group">
           <textarea
             name="notes"
             placeholder="Write down some notes ..."
@@ -300,10 +310,10 @@ export default function AddPatient() {
         </div>
       </div>
 
-      <div className="form-section">
+      <div className="form-container-section">
         <h2>Medical History</h2>
         
-        <div className="form-group">
+        <div className="form-section-group">
           <label>Allergies</label>
           <div className="tags-container">
             {allergies.map((allergy, index) => (
@@ -333,7 +343,7 @@ export default function AddPatient() {
           </div>
         </div>
 
-        <div className="form-group">
+        <div className="form-section-group">
           <label>Maladie Chronique</label>
           <div className="tags-container">
             {chronicConditions.map((condition, index) => (
@@ -363,7 +373,7 @@ export default function AddPatient() {
           </div>
         </div>
 
-        <div className="form-group">
+        <div className="form-section-group">
           <label>Maladie Héréditaire</label>
           <div className="tags-container">
             {hereditary.map((disease, index) => (
@@ -393,7 +403,7 @@ export default function AddPatient() {
           </div>
         </div>
 
-        <div className="form-group">
+        <div className="form-section-group">
           <label>Current Medications</label>
           <textarea
             name="currentMedications"
