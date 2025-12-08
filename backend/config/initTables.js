@@ -89,22 +89,30 @@ module.exports = (db) => {
     );
   `;
 
-  // PAYMENT
+  // PAYMENT - CORRECTED VERSION
   const createPaymentTable = `
     CREATE TABLE IF NOT EXISTS Payment (
       payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      service_id INTEGER,
-      amount REAL NOT NULL,
+      service_id INTEGER UNIQUE,
+      total_amount REAL NOT NULL,
+      status TEXT DEFAULT 'unpaid' CHECK(status IN ('unpaid', 'partially_paid', 'completed')),
+      description TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (service_id) REFERENCES Services(service_id) ON DELETE CASCADE
     );
   `;
 
-  // INVOICES
+
+  // INVOICES - CORRECTED VERSION
   const createInvoicesTable = `
     CREATE TABLE IF NOT EXISTS Invoices (
       invoice_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      payment_id INTEGER,
       appointment_id INTEGER UNIQUE,
       amount REAL NOT NULL,
+      description TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (payment_id) REFERENCES Payment(payment_id) ON DELETE CASCADE,
       FOREIGN KEY (appointment_id) REFERENCES Appointment(appointment_id) ON DELETE CASCADE
     );
   `;

@@ -40,7 +40,7 @@ export default function Dashboard() {
       for(var i=0; i<max_length; i++) {
         const patient = response.data[i];
         patient_list.push(
-          {name: patient['first_name'] + ' ' +  patient['last_name'], registered: 'Today'}
+          {id: patient['patient_id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: 'Today'}
         );
       }
       setNewPatients(patient_list);
@@ -124,9 +124,7 @@ export default function Dashboard() {
                   <div className="patient-name">{patient.name}</div>
                   <div className="registered-date">Registered: {patient.registered}</div>
                 </div>
-                <button className="link-button-dashboard"
-                  onClick={() => navigate('/patient_profile')}
-                >View Profile</button>
+                <button className="link-button-dashboard" onClick={() => navigate(`/patient_profile/${patient.id}`)}>View Profile</button>
               </div>
             ))}
           </div>

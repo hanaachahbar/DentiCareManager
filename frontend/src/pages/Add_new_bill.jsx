@@ -18,8 +18,13 @@ export default function AddBillForm() {
     amountPaid: '',
     outstanding: '',
     paymentStatus: 'Unpaid',
-    description: ''
+    description: '',
+    selectedAppointment: ''
   });
+
+  // Appointments data for selection
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
 
   // Pre-fill form if editing an existing invoice
   useEffect(() => {
@@ -40,21 +45,100 @@ export default function AddBillForm() {
         amountPaid: invoice.amountPaid || '',
         outstanding: invoice.outstanding || '',
         paymentStatus: invoice.status || 'Unpaid',
-        description: ''
+        description: '',
+        selectedAppointment: ''
       });
     }
   }, [invoice]);
 
-  const handleSave = () => {
-    if (isEditMode) {
-      console.log('Bill updated:', formData);
-      alert('Bill updated successfully!');
-    } else {
-      console.log('Bill submitted:', formData);
-      alert('Bill saved successfully!');
+  // Fetch appointments for selection (only for new bills)
+  useEffect(() => {
+    if (!isEditMode) {
+      const fetchAppointments = async () => {
+        try {
+          setLoadingAppointments(true);
+          const response = await fetch('http://localhost:5000/api/appointments');
+          if (!response.ok) {
+            throw new Error('Failed to fetch appointments');
+          }
+          const data = await response.json();
+
+          // Filter appointments that don't already have invoices
+          const availableAppointments = data.filter(appointment => {
+            // In a real app, you'd check against existing invoices
+            // For now, we'll just show all appointments
+            return appointment.status === 'checked-in'; // Only show completed appointments
+          });
+
+          setAppointments(availableAppointments);
+        } catch (err) {
+          console.error('Error fetching appointments:', err);
+          alert('Failed to load appointments. Please try again.');
+        } finally {
+          setLoadingAppointments(false);
+        }
+      };
+
+      fetchAppointments();
     }
-    // Navigate back to payments page
-    navigate('/payments');
+  }, [isEditMode]);
+
+  const handleSave = async () => {
+    try {
+      if (isEditMode) {
+        // Update existing invoice
+        const response = await fetch(`http://localhost:5000/api/invoices/${formData.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: parseFloat(formData.totalAmount),
+            status: formData.paymentStatus,
+            description: formData.description,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update invoice');
+        }
+
+        alert('Bill updated successfully!');
+      } else {
+        // For new bills, create invoice from selected appointment
+        if (!formData.selectedAppointment) {
+          alert('Please select an appointment first to create an invoice.');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/invoices/from-appointment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            appointment_id: formData.selectedAppointment,
+            amount: parseFloat(formData.totalAmount),
+            description: formData.description,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create invoice');
+        }
+
+        const result = await response.json();
+        alert('Bill created successfully!');
+        console.log('Created invoice:', result);
+      }
+
+      // Navigate back to payments page
+      navigate('/payments');
+    } catch (error) {
+      console.error('Error saving bill:', error);
+      alert('Failed to save bill. Please try again.');
+    }
   };
 
   const handleCancel = () => {
@@ -73,7 +157,8 @@ export default function AddBillForm() {
         amountPaid: '',
         outstanding: '',
         paymentStatus: 'Unpaid',
-        description: ''
+        description: '',
+        selectedAppointment: ''
       });
     }
   };
@@ -84,91 +169,141 @@ export default function AddBillForm() {
       <div className="bill-form-container">
         <div className="bill-form-card">
           <h1 className="form-title">Add New Bill</h1>
-          
+
           <div>
+            {/* Select Appointment */}
             <div className="form-row">
-              {/* Bill Date */}
               <div className="form-group">
                 <label className="form-label">
-                  Bill Date
-                </label>
-                <div className="input-wrapper">
-                  <input
-                    type="date"
-                    value={formData.billDate}
-                    onChange={(e) => setFormData({...formData, billDate: e.target.value})}
-                    className="form-input"
-                    placeholder="mm/dd/yyyy"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="form-row">
-              {/* Total Amount */}
-              <div className="form-group">
-                <label className="form-label">
-                  Amount
-                </label>
-                <div className="amount-input-wrapper">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.totalAmount}
-                    onChange={(e) => setFormData({...formData, totalAmount: e.target.value})}
-                    className="form-input amount-input"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              {/* Payment Status */}
-              <div className="form-group">
-                <label className="form-label">
-                  Payment Status
+                  Select Appointment
                 </label>
                 <select
-                  value={formData.paymentStatus}
-                  onChange={(e) => setFormData({...formData, paymentStatus: e.target.value})}
+                  value={formData.selectedAppointment}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    const selectedAppointment = appointments.find(app => app.appointment_id.toString() === selectedId);
+                    setFormData({
+                      ...formData,
+                      selectedAppointment: selectedId,
+                      patientName: selectedAppointment ? selectedAppointment.patientName : '',
+                      services: selectedAppointment ? selectedAppointment.service_name : '',
+                      billDate: selectedAppointment ? new Date(selectedAppointment.appointment_date).toISOString().split('T')[0] : '',
+                      description: selectedAppointment ? `${selectedAppointment.service_name} - ${selectedAppointment.patientName}` : ''
+                    });
+                  }}
                   className="form-select"
+                  disabled={loadingAppointments}
                 >
-                  <option value="Unpaid">Unpaid</option>
-                  <option value="Paid">Paid</option>
-                  <option value="Partially Paid">Partially Paid</option>
-                  <option value="Pending">Pending</option>
+                  <option value="">
+                    {loadingAppointments ? 'Loading appointments...' : 'Select an appointment'}
+                  </option>
+                  {appointments.map((appointment) => (
+                    <option key={appointment.appointment_id} value={appointment.appointment_id}>
+                      {appointment.patientName} - {appointment.service_name} - {new Date(appointment.appointment_date).toLocaleDateString()}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            {/* Description */}
-            <div className="description-group">
-              <label className="form-label">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                rows="5"
-                className="form-textarea"
-                placeholder="Enter a brief description for the bill..."
-              />
-            </div>
+            {formData.selectedAppointment && (
+              <>
+                <div className="form-row">
+                  {/* Patient Name (auto-filled) */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      Patient Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.patientName}
+                      className="form-input"
+                      disabled
+                      style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+                    />
+                  </div>
 
-            {/* Action Buttons */}
-            <div className="form-actions">
-              <button
-                onClick={handleCancel}
-                className="btn-cancel"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                className="btn-save"
-              >
-                Save Bill
-              </button>
-            </div>
+                  {/* Service (auto-filled) */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      Service
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.services}
+                      className="form-input"
+                      disabled
+                      style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  {/* Bill Date (auto-filled) */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      Bill Date
+                    </label>
+                    <div className="input-wrapper">
+                      <input
+                        type="date"
+                        value={formData.billDate}
+                        onChange={(e) => setFormData({...formData, billDate: e.target.value})}
+                        className="form-input"
+                        placeholder="mm/dd/yyyy"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Total Amount */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      Amount
+                    </label>
+                    <div className="amount-input-wrapper">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.totalAmount}
+                        onChange={(e) => setFormData({...formData, totalAmount: e.target.value})}
+                        className="form-input amount-input"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="description-group">
+                  <label className="form-label">
+                    Description
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    rows="5"
+                    className="form-textarea"
+                    placeholder="Enter a brief description for the bill..."
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="form-actions">
+                  <button
+                    onClick={handleCancel}
+                    className="btn-cancel"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    className="btn-save"
+                  >
+                    Save Bill
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

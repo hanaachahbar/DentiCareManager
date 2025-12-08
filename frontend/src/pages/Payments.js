@@ -29,53 +29,53 @@ const PaymentTracking = () => {
   const datePickerRef = useRef(null);
   const navigate = useNavigate();
 
-  // Sample payment data
-  const [payments, setPayments] = useState([
-    {
-      id: 1,
-      patientName: "John Doe",
-      invoiceNum: "INV-00123",
-      date: "Oct 25, 2023",
-      services: "Cleaning, X-Ray",
-      totalCharge: 250.0,
-      amountPaid: 250.0,
-      outstanding: 0.0,
-      status: "Completed",
-    },
-    {
-      id: 2,
-      patientName: "Jane Smith",
-      invoiceNum: "INV-00122",
-      date: "Oct 24, 2023",
-      services: "Root Canal",
-      totalCharge: 1200.0,
-      amountPaid: 600.0,
-      outstanding: 600.0,
-      status: "In Progress",
-    },
-    {
-      id: 3,
-      patientName: "Mike Johnson",
-      invoiceNum: "INV-00121",
-      date: "Oct 22, 2023",
-      services: "Crown Fitting",
-      totalCharge: 850.0,
-      amountPaid: 0.0,
-      outstanding: 850.0,
-      status: "Unpaid",
-    },
-    {
-      id: 4,
-      patientName: "Emily Davis",
-      invoiceNum: "INV-00120",
-      date: "Oct 21, 2023",
-      services: "Check-up",
-      totalCharge: 100.0,
-      amountPaid: 100.0,
-      outstanding: 0.0,
-      status: "Completed",
-    },
-  ]);
+  // Fetch invoices from API
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:5000/api/invoices');
+        if (!response.ok) {
+          throw new Error('Failed to fetch invoices');
+        }
+        const data = await response.json();
+
+        // Transform data to match frontend expectations
+        const transformedData = data.map(invoice => ({
+          id: invoice.invoice_id,
+          patientName: invoice.patientName || 'Unknown Patient',
+          invoiceNum: invoice.invoiceNum,
+          date: new Date(invoice.date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          }),
+          services: invoice.services || 'General Service',
+          totalCharge: parseFloat(invoice.totalCharge) || 0,
+          amountPaid: parseFloat(invoice.amountPaid) || 0,
+          outstanding: parseFloat(invoice.outstanding) || 0,
+          status: invoice.status || 'Unpaid',
+        }));
+
+        setPayments(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching invoices:', err);
+        setError('Failed to load invoices. Please try again later.');
+        // Keep empty array on error
+        setPayments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoices();
+  }, []);
+
+  // Payment data from API
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Calculate totals
   const totalOutstanding = payments.reduce((sum, p) => sum + p.outstanding, 0);
@@ -213,13 +213,26 @@ const PaymentTracking = () => {
   };
 
   // Confirm delete
-  const confirmDelete = (invoice) => {
-    // Remove the invoice from the payments array
-    setPayments((prevPayments) =>
-      prevPayments.filter((p) => p.id !== invoice.id)
-    );
-    setDeleteModalOpen(false);
-    setSelectedInvoice(null);
+  const confirmDelete = async (invoice) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/invoices/${invoice.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete invoice');
+      }
+
+      // Remove the invoice from the payments array
+      setPayments((prevPayments) =>
+        prevPayments.filter((p) => p.id !== invoice.id)
+      );
+      setDeleteModalOpen(false);
+      setSelectedInvoice(null);
+    } catch (err) {
+      console.error('Error deleting invoice:', err);
+      alert('Failed to delete invoice. Please try again.');
+    }
   };
 
   // Close delete modal
@@ -479,7 +492,19 @@ const PaymentTracking = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPayments.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>
+                    Loading invoices...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+                    {error}
+                  </td>
+                </tr>
+              ) : filteredPayments.length > 0 ? (
                 filteredPayments.map((payment) => (
                   <tr key={payment.id}>
                     <td className="patient-name">{payment.patientName}</td>

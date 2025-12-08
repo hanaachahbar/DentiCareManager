@@ -81,7 +81,7 @@ exports.updatePatient = (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     if (this.changes === 0) return res.status(404).json({ error: "Patient not found" });
 
-    db.get("SELECT * FROM patients WHERE patient_id = ?", [id], (err, row) => {
+    db.get("SELECT * FROM Patient WHERE patient_id = ?", [id], (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json(row);
     });
