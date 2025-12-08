@@ -25,7 +25,7 @@ function App() {
 
       <div style={{ padding: "20px" }}>
         <Routes>
-          <Route path="/patient_profile" element={<PatientProfile />} />
+          <Route path="/patient_profile/:patientId" element={<PatientProfile />} />
 
 
           <Route path="/service-details" element={<ODF />} />
