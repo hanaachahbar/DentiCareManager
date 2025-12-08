@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 // GET all patients
 exports.getPatients = (req, res) => {
-  db.all("SELECT * FROM patients ORDER BY created_at DESC", [], (err, rows) => {
+  db.all("SELECT * FROM Patient ORDER BY created_at DESC", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
@@ -12,7 +12,7 @@ exports.getPatients = (req, res) => {
 exports.getPatientById = (req, res) => {
   const { id } = req.params;
 
-  db.get("SELECT * FROM patients WHERE patient_id = ?", [id], (err, row) => {
+  db.get("SELECT * FROM Patient WHERE patient_id = ?", [id], (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!row) return res.status(404).json({ error: "Patient not found" });
     res.json(row);
@@ -28,7 +28,7 @@ exports.addPatient = (req, res) => {
   } = req.body;
 
   const sql = `
-    INSERT INTO patients (
+    INSERT INTO Patient (
       first_name, last_name, date_of_birth, gender, phone_number,
       emergency_call, email, address, city, notes,
       allergies, chronic_conditions, hereditary_conditions, current_medications
@@ -77,7 +77,7 @@ exports.updatePatient = (req, res) => {
 
   values.push(id);
 
-  db.run(`UPDATE patients SET ${updates.join(", ")} WHERE patient_id = ?`, values, function(err) {
+  db.run(`UPDATE Patient SET ${updates.join(", ")} WHERE patient_id = ?`, values, function(err) {
     if (err) return res.status(500).json({ error: err.message });
     if (this.changes === 0) return res.status(404).json({ error: "Patient not found" });
 
@@ -92,7 +92,7 @@ exports.updatePatient = (req, res) => {
 exports.deletePatient = (req, res) => {
   const { id } = req.params;
 
-  db.run("DELETE FROM patients WHERE patient_id = ?", [id], function(err) {
+  db.run("DELETE FROM Patient WHERE patient_id = ?", [id], function(err) {
     if (err) return res.status(500).json({ error: err.message });
     if (this.changes === 0) return res.status(404).json({ error: "Patient not found" });
     res.json({ message: "Patient deleted successfully" });
