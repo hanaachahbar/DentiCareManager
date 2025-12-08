@@ -29,7 +29,7 @@ function createWindow() {
 // Start backend when Electron is ready
 app.whenReady().then(() => {
   // Spawn backend process
-  backendProcess = spawn('node', [path.join(__dirname, '../backend/server.js')], {
+  backendProcess = spawn('node', [path.join(__dirname, 'backend/server.js')], {
     stdio: 'inherit', // show backend logs in terminal
     shell: true
   });

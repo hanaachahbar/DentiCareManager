@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../styles/add_new_lab.css';
+import axios from 'axios';
 
 export default function LabForm({onClose, onCreateLab}) {
 
@@ -21,32 +22,44 @@ export default function LabForm({onClose, onCreateLab}) {
 
     const [errorMessages, setErrorMessages] = useState({});
 
-    function verifyLabDetails() {
-        const { name, phone, email, address, personalContact} = labDetails;
+    async function verifyLabDetails() { 
+        const { name, phone, email, address, personalContact} = labDetails; 
         let newErrors = {};
 
-        if(!name.trim()) newErrors.name = "Lab name required";
-        if(!address.trim()) newErrors.address = "Lab address required";
+        if(!name.trim()) newErrors.name = "Lab name required"; 
+        if(!address.trim()) newErrors.address = "Lab address required"; 
 
-        const phoneRegex = /^(?:\+213|0)(5|6|7)\d{8}$/;
-        if(!phone.trim()) newErrors.phone = "Phone number required";
-        else if(!phoneRegex.test(phone))
-            newErrors.phone = "Invalid phone number";
+        const phoneRegex = /^(?:\+213|0)(5|6|7)\d{8}$/; 
+        if(!phone.trim()) newErrors.phone = "Phone number required"; 
+        else if(!phoneRegex.test(phone)) newErrors.phone = "Invalid phone number"; 
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-        if(!email.trim()) newErrors.email = "Email address required";
-        else if(!emailRegex.test(email))
-            newErrors.email = "Invalid email address";
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/; 
+        if(!email.trim()) newErrors.email = "Email address required"; 
+        else if(!emailRegex.test(email)) newErrors.email = "Invalid email address";
 
         if(personalContact && !phoneRegex.test(personalContact))
             newErrors.personalContact = "Invalid phone number";
 
         setErrorMessages(newErrors);
         if(Object.keys(newErrors).length === 0) {
-            onCreateLab(labDetails);
-            onClose();
-        }
+            const response = await axios.post('http://localhost:5000/api/labs', labDetails); 
+            try {
+                if(response.data.status) {
+                    console.log(response.data.lab_data);
+                    onCreateLab({
+                        ...response.data.lab_data,
+                        phone_number: phone,
+                        contact_person: personalContact
+                    });
+                    onClose();
+                    alert('Lab saved successfully!'); 
+                } 
+            } catch(error) {
+                console.log("From server: ", error); 
+            } 
+        } 
     }
+
 
     return (
         <div className="blur-background">

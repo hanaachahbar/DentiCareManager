@@ -143,7 +143,20 @@ module.exports = (db) => {
     );
   `;
 
-  // Creating tables by respecting their order
+
+  // Helper table for services inside lab
+  const createLabServiceTable = `
+    CREATE TABLE IF NOT EXISTS Lab_Service (
+      lab_service_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lab_id INTEGER NOT NULL,
+      service_id INTEGER NOT NULL,
+      FOREIGN KEY (lab_id) REFERENCES Labs(lab_id) ON DELETE CASCADE,
+      FOREIGN KEY (service_id) REFERENCES Services(service_id) ON DELETE CASCADE,
+      UNIQUE(lab_id, service_id)
+    );
+  `;
+
+  // Creating tables by respecting their order (important because of Foreign Key dependencies)
   const tables = [
     createPatientTable,
     createServicesTable,
@@ -154,7 +167,8 @@ module.exports = (db) => {
     createPaymentTable,
     createInvoicesTable,
     createLabsTable,
-    createLabWorkTable
+    createLabWorkTable,
+    createLabServiceTable
   ];
 
   tables.forEach((query) => {

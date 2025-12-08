@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import '../styles/add_newWork.css';
+import axios from 'axios';
 
-export default function WorkForm({ onClose, onCreateWork }) {
+export default function WorkForm({ onClose, onCreateWork, labId, serviceId }) {
 
     const [workDetails, setWorkDetails] = useState({
         description: '',
@@ -20,7 +21,7 @@ export default function WorkForm({ onClose, onCreateWork }) {
     const [errorMessages, setErrorMessages] = useState({});
 
     function verifyWorkDetails() {
-        const { deliveryDate } = workDetails;
+        const { deliveryDate, description } = workDetails;
         let newErrors = {};
 
         if(!deliveryDate.trim()) newErrors.deliveryDate = "Delivery date is required";
@@ -30,8 +31,20 @@ export default function WorkForm({ onClose, onCreateWork }) {
         setErrorMessages(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
-            onCreateWork(workDetails);
-            onClose();
+            axios.post('http://localhost:5000/api/lab_works', {
+                lab_id: labId,
+                service_id: serviceId,
+                description,
+                delivery_date: deliveryDate,
+                status: 'in progress'
+            }).then(response => {
+                console.log(response.data);
+                onCreateWork(response.data);
+                onClose();
+            }).catch(err => {
+                console.error("Error creating work:", err);
+                alert("Failed to create work.");
+            });
         }
     }
 
