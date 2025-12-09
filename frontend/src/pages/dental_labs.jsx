@@ -94,9 +94,18 @@ export default function DentalLabs() {
 
   const removeService = async (lab_service_id) => {
     try {
+      // Get service info to know service_id and lab_id
+      const service = labServices.find(s => s.lab_service_id === lab_service_id);
+      if(service) {
+        await axios.delete(`http://localhost:5000/api/lab_works/lab-work/${service.service_id}/${service.lab_id}`);
+      }
+
       await axios.delete(`http://localhost:5000/api/labService/${lab_service_id}`);
+
       setLabServices(prev => prev.filter(ls => ls.lab_service_id !== lab_service_id));
-      setLabWorks(prev => prev.filter(lw => lw.lab_service_id !== lab_service_id));
+      setLabWorks(prev => prev.filter(
+        lw => !(lw.service_id === service.service_id && lw.lab_id === service.lab_id)
+      ));
     } catch (err) {
       console.error(err);
     }

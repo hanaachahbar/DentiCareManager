@@ -15,6 +15,9 @@ router.get("/:id", servicesController.getServiceById);
 // Get services by patient ID
 router.get("/patient/:patient_id", servicesController.getServicesByPatientId);
 
+// Get services by patient ID but without payments
+router.get("/servicePatient/:patient_id", servicesController.getServicesByPatIdNoPayment);
+
 // Update service
 router.put("/:id", servicesController.updateService);
 
