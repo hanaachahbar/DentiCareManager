@@ -95,6 +95,7 @@ module.exports = (db) => {
       payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
       service_id INTEGER UNIQUE,
       total_amount REAL NOT NULL,
+      paid_amount REAL DEFAULT 0,
       status TEXT DEFAULT 'unpaid' CHECK(status IN ('unpaid', 'partially_paid', 'completed')),
       description TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
