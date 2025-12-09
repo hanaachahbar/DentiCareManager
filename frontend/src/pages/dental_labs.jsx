@@ -170,13 +170,19 @@ export default function DentalLabs() {
 
   // ---------------------- Filtering ----------------------
   const term = searchTerm.toLowerCase();
-  const filteredLabs = labs.map(lab => {
+  const filteredLabs = labs
+  .map(lab => {
     const servicesOfLab = labServices.filter(ls => ls.lab_id === lab.lab_id);
-    const filteredServices = servicesOfLab.filter(ls =>
-      (ls.patient_name?.toLowerCase().includes(term)) ||
-      (ls.service_name?.toLowerCase().includes(term))
-    );
-    if (lab.name.toLowerCase().includes(term) || filteredServices.length > 0) {
+    const labMatches = lab.name.toLowerCase().includes(term);
+    const filteredServices = labMatches
+      ? servicesOfLab
+      : servicesOfLab.filter(ls =>
+          ls.patient_name?.toLowerCase().includes(term) ||
+          ls.service_name?.toLowerCase().includes(term)
+        );
+
+    // Include lab if either lab name matches or at least one service matches
+    if(labMatches || filteredServices.length > 0) {
       return { ...lab, services: filteredServices };
     }
     return null;
