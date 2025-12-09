@@ -34,12 +34,21 @@ exports.createService = (req, res) => {
       const service_id = this.lastID;
 
       // Create associated payment - FIXED: Added paid_amount column
+<<<<<<< HEAD
       const paymentSQL = `
         INSERT INTO Payment (service_id, total_amount, paid_amount, description, status)
         VALUES (?, ?, ?, ?, 'unpaid')
       `;
 
       db.run(paymentSQL, [service_id, total_cost, 0, payment_description || ''], function(err) {
+=======
+// OLD - incorrect column reference
+const paymentSQL = `
+  INSERT INTO Payment (service_id, total_amount, paid_amount, description, status)
+  VALUES (?, ?, ?, ?, 'unpaid')
+`;
+db.run(paymentSQL, [service_id, total_cost, 0, payment_description || ''], function(err) {
+>>>>>>> hanaaBackend2
         if (err) {
           return res.status(500).json({ error: err.message });
         }
