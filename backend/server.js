@@ -14,14 +14,12 @@ const paymentsRoute = require("./routes/payments");
 const invoicesRoute = require("./routes/invoices");
 const servicesRoute = require("./routes/services");
 const appointmentsRoute = require("./routes/appointments");
-/*const 
-const documentsRoute = require("./routes/documents");
 
+/*
+const documentsRoute = require("./routes/documents");
 const prescriptionsRoute = require("./routes/prescriptions");
 const medicationsRoute = require("./routes/medications");
-
-const labsRoute = require("./routes/labs");
-const labWorksRoute = require("./routes/lab_works");*/
+*/
 
 // Route mappings
 app.use("/api/patients", patientsRoute);
@@ -29,37 +27,25 @@ app.use("/api/payments", paymentsRoute);
 app.use("/api/invoices", invoicesRoute);
 app.use("/api/services", servicesRoute);
 app.use("/api/appointments", appointmentsRoute);
+
 /*
 app.use("/api/documents", documentsRoute);
-
 app.use("/api/prescriptions", prescriptionsRoute);
 app.use("/api/medications", medicationsRoute);
-
-app.use("/api/labs", labsRoute);
-app.use("/api/lab_works", labWorksRoute);*/
-/*const appointmentsRoute = require("./routes/appointments");
-const documentsRoute = require("./routes/documents");
-const prescriptionsRoute = require("./routes/prescriptions");
-const medicationsRoute = require("./routes/medications");
-const paymentsRoute = require("./routes/payments");
-const invoicesRoute = require("./routes/invoices");
 */
+
 const labsRoute = require("./routes/labs");
-const servicesRoute = require("./routes/services");
 const labWorksRoute = require("./routes/labWorks");
 const labServicesRoute = require("./routes/labService");
 
 // Route mappings
-app.use("/api/patients", patientsRoute);
-/*app.use("/api/appointments", appointmentsRoute);
+/*
 app.use("/api/documents", documentsRoute);
 app.use("/api/prescriptions", prescriptionsRoute);
 app.use("/api/medications", medicationsRoute);
-app.use("/api/payments", paymentsRoute);
-app.use("/api/invoices", invoicesRoute);
 */
+
 app.use("/api/labs", labsRoute);
-app.use("/api/services", servicesRoute);
 app.use("/api/lab_works", labWorksRoute);
 app.use("/api/labService", labServicesRoute);
 
