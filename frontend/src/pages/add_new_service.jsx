@@ -14,26 +14,6 @@ export default function ServiceForm({ onClose, onCreateService, labId }) {
     const [filteredServices, setFilteredServices] = useState([]);
     const [errorMessages, setErrorMessages] = useState({});
 
-    // Mock patient-service relationships based on your seed data
-    // Patient 1 (John Doe): services 1, 2, 3
-    // Patient 2 (Sarah Smith): services 4, 5  
-    // Patient 3 (Mohamed Ali): service 6
-    const patientServicesMap = {
-        1: [1, 2, 3],  // John Doe's services
-        2: [4, 5],     // Sarah Smith's services
-        3: [6]         // Mohamed Ali's services
-    };
-
-    // Available services data
-    const allServices = [
-        { service_id: 1, service_name: "Annual Physical Exam" },
-        { service_id: 2, service_name: "Blood Test" },
-        { service_id: 3, service_name: "X-Ray Consultation" },
-        { service_id: 4, service_name: "Pregnancy Checkup" },
-        { service_id: 5, service_name: "Ultrasound Scan" },
-        { service_id: 6, service_name: "Diabetes Management" }
-    ];
-
     useEffect(() => {
         const fetchPatients = async () => {
             try {
@@ -54,16 +34,6 @@ export default function ServiceForm({ onClose, onCreateService, labId }) {
         fetchPatients();
     }, []);
 
-    // Filter services based on selected patient
-    const filterServicesByPatient = (patientId) => {
-        if (!patientId) return [];
-        
-        const serviceIds = patientServicesMap[patientId] || [];
-        return allServices.filter(service => 
-            serviceIds.includes(service.service_id)
-        );
-    };
-
     function handlePatientSearch(e) {
         const value = e.target.value;
         setPatientSearch(value);
@@ -73,16 +43,27 @@ export default function ServiceForm({ onClose, onCreateService, labId }) {
         setFilteredPatients(results);
     }
 
-    function choosePatient(patient) {
+    async function choosePatient(patient) {
         setSelectedPatient(patient);
         setPatientSearch(patient.name);
         setFilteredPatients([]);
-        
-        // Filter services for this patient
-        const patientServices = filterServicesByPatient(patient.patient_id);
-        setServices(patientServices);
-        
-        // Reset service selection
+
+        try {
+            const res = await axios.get(`http://localhost:5000/api/services/servicePatient/${patient.patient_id}`);
+
+            // mapping returned services to dropdown data
+            const mapped = res.data.services.map(s => ({
+                service_id: s.service_id,
+                service_name: s.service_name
+            }));
+
+            setServices(mapped);
+
+        } catch (err) {
+            console.error("Error fetching patient services:", err);
+            setServices([]);
+        }
+
         setSelectedService(null);
         setServiceSearch("");
         setFilteredServices([]);

@@ -209,6 +209,40 @@ exports.getServicesByPatientId = (req, res) => {
   });
 };
 
+
+
+exports.getServicesByPatIdNoPayment = (req, res) => {
+  const { patient_id } = req.params;
+
+  // Check if patient exists
+  db.get("SELECT * FROM Patient WHERE patient_id = ?", [patient_id], (err, patient) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    const query = `SELECT * FROM Services WHERE patient_id = ?`;
+
+    db.all(query, [patient_id], (err, services) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      res.json({ 
+        patient: {
+          patient_id: patient.patient_id,
+          first_name: patient.first_name,
+          last_name: patient.last_name
+        },
+        services 
+      });
+    });
+  });
+};
+
+
 // Update service
 exports.updateService = (req, res) => {
   const { id } = req.params;

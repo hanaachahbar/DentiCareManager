@@ -107,3 +107,16 @@ exports.deleteLabWork = (req, res) => {
         res.json({ message: "Lab work deleted successfully" });
     });
 };
+
+
+exports.deleteWorksByService = (req, res) => {
+  const { service_id, lab_id } = req.params;
+
+  db.run(
+    "DELETE FROM Lab_work WHERE service_id = ? AND lab_id = ?",
+    [service_id, lab_id], (err) => {
+      if(err) return res.status(500).json({ error: err.message });
+      res.json({ message: "Lab works deleted successfully" });
+    }
+  );
+};
