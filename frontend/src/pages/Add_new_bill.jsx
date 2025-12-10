@@ -1,7 +1,7 @@
 // src/components/AddBill.jsx
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../styles/add_new_bill.css';
+import '../styles/Add_new_bill.css';
 
 const AddBill = () => {
   const navigate = useNavigate();

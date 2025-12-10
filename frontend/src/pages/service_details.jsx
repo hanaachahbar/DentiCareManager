@@ -4,6 +4,12 @@ import '../styles/service_details.css';
 
 const ServiceDetails = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [billModal, setBillModal] = useState({
+    isOpen: false,
+    appointmentId: null,
+    amount: '',
+    description: '',
+  });
   const fileInputRef = useRef(null);
 
   const service = {
@@ -28,6 +34,7 @@ const ServiceDetails = () => {
       },
       invoice: {
         amount: '$75',
+        description: 'Adjustment session fee',
       },
       files: [
         { name: 'Progress_Photo_12_Aug.jpg' },
@@ -101,16 +108,66 @@ const ServiceDetails = () => {
     setIsAddModalOpen(false);
   };
 
-  // Navigation to other pages
+  // Prescription navigation (unchanged)
   const handleAddPrescription = () => {
     window.location.href = `/prescription_management`;
   };
 
-  const handleAddBill = () => {
-    window.location.href = `/add_bill`;
+  // BILL POPUP LOGIC (local, no navigation)
+  const openBillModal = (appointmentId, existingInvoice) => {
+    setBillModal({
+      isOpen: true,
+      appointmentId,
+      amount: existingInvoice?.amount
+        ? existingInvoice.amount.replace(/[^0-9.]/g, '')
+        : '',
+      description: existingInvoice?.description || '',
+    });
   };
 
-  // File handling: open picker and append selected files
+  const closeBillModal = () => {
+    setBillModal({
+      isOpen: false,
+      appointmentId: null,
+      amount: '',
+      description: '',
+    });
+  };
+
+  const handleBillChange = (e) => {
+    const { name, value } = e.target;
+    setBillModal((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveBill = () => {
+    if (!billModal.amount) {
+      alert('Please enter an amount.');
+      return;
+    }
+
+    const formattedAmount = `$${parseFloat(billModal.amount).toFixed(2)}`;
+
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.id === billModal.appointmentId
+          ? {
+              ...apt,
+              invoice: {
+                amount: formattedAmount,
+                description: billModal.description.trim(),
+              },
+            }
+          : apt
+      )
+    );
+
+    closeBillModal();
+  };
+
+  // Files
   const triggerFilePicker = (appointmentId) => {
     if (!fileInputRef.current) return;
     fileInputRef.current.dataset.appointmentId = appointmentId;
@@ -191,7 +248,7 @@ const ServiceDetails = () => {
 
           {appointments.map((apt) => (
             <article key={apt.id} className="appointment-card">
-              {/* Top row: date + time + id */}
+              {/* Top row */}
               <div className="appointment-top-row">
                 <div>
                   <p className="appointment-date-main">
@@ -209,7 +266,7 @@ const ServiceDetails = () => {
               )}
 
               <div className="appointment-columns">
-                {/* 1) Prescription first */}
+                {/* Prescription */}
                 <div className="appointment-panel prescription-panel">
                   <div className="panel-header">
                     <span className="panel-title">Prescription</span>
@@ -230,14 +287,14 @@ const ServiceDetails = () => {
                   ) : (
                     <button
                       className="panel-empty-btn"
-                      onClick={() => handleAddPrescription(apt.id)}
+                      onClick={handleAddPrescription}
                     >
                       + Add prescription
                     </button>
                   )}
                 </div>
 
-                {/* 2) Files second */}
+                {/* Files */}
                 <div className="appointment-panel files-panel">
                   <div className="panel-header">
                     <span className="panel-title">Files</span>
@@ -268,22 +325,35 @@ const ServiceDetails = () => {
                   </button>
                 </div>
 
-                {/* 3) Bill last – only amount or add bill */}
+                {/* Bill */}
                 <div className="appointment-panel invoice-panel">
                   <div className="panel-header">
                     <span className="panel-title">Bill</span>
                   </div>
 
                   {apt.invoice ? (
-                    <div className="bill-display">
+                    <div className="bill-display-column">
                       <span className="bill-amount">
                         {apt.invoice.amount}
                       </span>
+                      {apt.invoice.description && (
+                        <span className="bill-description">
+                          {apt.invoice.description}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="panel-empty-btn bill-edit-btn"
+                        onClick={() => openBillModal(apt.id, apt.invoice)}
+                      >
+                        Edit bill
+                      </button>
                     </div>
                   ) : (
                     <button
+                      type="button"
                       className="panel-empty-btn"
-                      onClick={() => handleAddBill(apt.id)}
+                      onClick={() => openBillModal(apt.id, null)}
                     >
                       + Add bill
                     </button>
@@ -382,6 +452,73 @@ const ServiceDetails = () => {
                 onClick={handleCreateAppointment}
               >
                 Create appointment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add / Edit Bill Modal */}
+      {billModal.isOpen && (
+        <div className="service-modal-overlay">
+          <div className="service-modal-container bill-modal-container">
+            <div className="service-modal-header">
+              <h2 className="service-modal-title">Bill for appointment</h2>
+              <button
+                className="service-modal-close"
+                onClick={closeBillModal}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="service-modal-body">
+              <div className="bill-modal-grid">
+                <div className="service-modal-group">
+                  <label className="service-modal-label">Amount</label>
+                  <div className="bill-amount-wrapper">
+                    <span className="bill-amount-prefix">$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      name="amount"
+                      value={billModal.amount}
+                      onChange={handleBillChange}
+                      className="service-modal-input bill-amount-input"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div className="service-modal-group bill-notes-group">
+                  <label className="service-modal-label">
+                    Description (optional)
+                  </label>
+                  <textarea
+                    name="description"
+                    value={billModal.description}
+                    onChange={handleBillChange}
+                    rows="3"
+                    className="service-modal-textarea"
+                    placeholder="Short note about this invoice..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="service-modal-footer">
+              <button
+                className="service-modal-btn-cancel"
+                onClick={closeBillModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="service-modal-btn-create"
+                onClick={handleSaveBill}
+              >
+                Save bill
               </button>
             </div>
           </div>
