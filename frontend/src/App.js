@@ -32,6 +32,7 @@ function App() {
           <Route path="/add-service" element={<AddServiceForm />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/add_patient" element={<AddPatient />} />
+          <Route path="/add_patient/:id" element={<AddPatient />} />
           <Route path="/dental_labs" element={<DentalLabs />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/patient-list" element={<PatientList />} />
