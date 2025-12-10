@@ -10,11 +10,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
     return console.error("Failed to connect to SQLite:", err.message);
   }
   console.log("Connected to SQLite database!");
-<<<<<<< HEAD
-  initializeTables(db);
-});
-
-=======
   
   // Step 1: Initialize all tables first
   initializeTables(db);
@@ -141,6 +136,5 @@ function runPaymentTableFix(db) {
     });
   });
 }
->>>>>>> hanaaBackend2
 
 module.exports = db;
