@@ -11,71 +11,153 @@ import {
 import { useNavigate } from "react-router-dom";
 import "../styles/Payments.css";
 import DeleteModal from "../components/DeleteModalInvoice";
-import  AddBillForm from "./Add_new_bill.jsx";
+import AddBillForm from "./Add_new_bill.jsx";
+
 const PaymentTracking = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [startDate, setStartDate] = useState(new Date(2023, 9, 5)); // Oct 5, 2023
-  const [endDate, setEndDate] = useState(new Date(2023, 9, 30)); // Oct 30, 2023
+  // Set default date range to last 90 days
+  const today = new Date();
+  const ninetyDaysAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+  const [startDate, setStartDate] = useState(ninetyDaysAgo);
+  const [endDate, setEndDate] = useState(today);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectingDate, setSelectingDate] = useState("start"); // 'start' or 'end'
-  const [currentMonth, setCurrentMonth] = useState(new Date(2023, 9, 1));
+  const [selectingDate, setSelectingDate] = useState("start");
+  const [currentMonth, setCurrentMonth] = useState(today);
   const [sortBy, setSortBy] = useState("date");
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState(null);
   const datePickerRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch invoices from API
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch payments from API
   useEffect(() => {
-    const fetchInvoices = async () => {
+    const fetchPayments = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/invoices');
+        console.log('Fetching payments...');
+        
+        const response = await fetch('http://localhost:5000/api/payments');
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch invoices');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
+        console.log('Payments data received:', data);
 
-        // Transform data to match frontend expectations
-        const transformedData = data.map(invoice => ({
-          id: invoice.invoice_id,
-          patientName: invoice.patientName || 'Unknown Patient',
-          invoiceNum: invoice.invoiceNum,
-          date: new Date(invoice.date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-          }),
-          services: invoice.services || 'General Service',
-          totalCharge: parseFloat(invoice.totalCharge) || 0,
-          amountPaid: parseFloat(invoice.amountPaid) || 0,
-          outstanding: parseFloat(invoice.outstanding) || 0,
-          status: invoice.status || 'Unpaid',
-        }));
+        if (!data.payments || !Array.isArray(data.payments)) {
+          throw new Error('Invalid data format received from server');
+        }
 
+        // Fetch all patients first to avoid multiple API calls
+        let patientsMap = {};
+        try {
+          const patientsResponse = await fetch('http://localhost:5000/api/patients');
+          if (patientsResponse.ok) {
+            const patientsData = await patientsResponse.json();
+            console.log('Patients data:', patientsData);
+            
+            // Create a map of patient_id to patient info
+            // Handle multiple response formats: array, { patients: [...] }, or { value: [...] }
+            let patientsList = [];
+            if (Array.isArray(patientsData)) {
+              patientsList = patientsData;
+            } else if (patientsData.patients && Array.isArray(patientsData.patients)) {
+              patientsList = patientsData.patients;
+            } else if (patientsData.value && Array.isArray(patientsData.value)) {
+              patientsList = patientsData.value;
+            }
+            
+            patientsMap = patientsList.reduce((acc, patient) => {
+              acc[patient.patient_id] = patient;
+              return acc;
+            }, {});
+            
+            console.log('Patients map created:', patientsMap);
+          }
+        } catch (err) {
+          console.error('Error fetching patients (will use fallback):', err);
+        }
+
+        // Transform backend data to match frontend expectations
+        const transformedData = data.payments.map((payment) => {
+          // Get patient name from the map
+          let patientName = 'Unknown Patient';
+          const patient = patientsMap[payment.patient_id];
+          if (patient) {
+            patientName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || 'Unknown Patient';
+          }
+
+          // Determine status based on payment status
+          let displayStatus;
+          switch (payment.status) {
+            case 'completed':
+              displayStatus = 'Completed';
+              break;
+            case 'partially_paid':
+              displayStatus = 'In Progress';
+              break;
+            case 'unpaid':
+            default:
+              displayStatus = 'Unpaid';
+              break;
+          }
+
+          // Parse and format the date
+          let formattedDate = 'N/A';
+          if (payment.created_at) {
+            try {
+              const date = new Date(payment.created_at);
+              if (!isNaN(date.getTime())) {
+                formattedDate = date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+              }
+            } catch (err) {
+              console.error('Error parsing date:', err);
+            }
+          }
+
+          return {
+            id: payment.payment_id,
+            patientName: patientName,
+            date: formattedDate,
+            services: payment.service_name || 'General Service',
+            totalCharge: parseFloat(payment.total_amount) || 0,
+            amountPaid: parseFloat(payment.paid_amount) || 0,
+            outstanding: parseFloat(payment.remaining_amount) || 0,
+            status: displayStatus,
+            // Keep original for reference
+            service_id: payment.service_id,
+            description: payment.description,
+            rawDate: payment.created_at
+          };
+        });
+
+        console.log('Transformed data:', transformedData);
         setPayments(transformedData);
         setError(null);
       } catch (err) {
-        console.error('Error fetching invoices:', err);
-        setError('Failed to load invoices. Please try again later.');
-        // Keep empty array on error
+        console.error('Error fetching payments:', err);
+        setError(`Failed to load payments: ${err.message}`);
         setPayments([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInvoices();
+    fetchPayments();
   }, []);
-
-  // Payment data from API
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Calculate totals
   const totalOutstanding = payments.reduce((sum, p) => sum + p.outstanding, 0);
@@ -86,20 +168,29 @@ const PaymentTracking = () => {
   const filteredPayments = payments
     .filter((payment) => {
       const matchesSearch =
-        payment.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.invoiceNum.toLowerCase().includes(searchTerm.toLowerCase());
+        payment.patientName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
         statusFilter === "All" || payment.status === statusFilter;
 
-      // Date filtering
-      const paymentDate = new Date(payment.date);
-      const matchesDateRange =
-        paymentDate >= startDate && paymentDate <= endDate;
+      // Date filtering - use rawDate for accurate comparison
+      let matchesDateRange = true;
+      if (payment.rawDate) {
+        try {
+          const paymentDate = new Date(payment.rawDate);
+          matchesDateRange = paymentDate >= startDate && paymentDate <= endDate;
+        } catch (err) {
+          console.error('Error comparing dates:', err);
+        }
+      }
 
       return matchesSearch && matchesStatus && matchesDateRange;
     })
     .sort((a, b) => {
-      if (sortBy === "date") return new Date(b.date) - new Date(a.date);
+      if (sortBy === "date") {
+        const dateA = a.rawDate ? new Date(a.rawDate) : new Date(0);
+        const dateB = b.rawDate ? new Date(b.rawDate) : new Date(0);
+        return dateB - dateA;
+      }
       if (sortBy === "total charge") return b.totalCharge - a.totalCharge;
       if (sortBy === "outstanding") return b.outstanding - a.outstanding;
       return 0;
@@ -139,7 +230,6 @@ const PaymentTracking = () => {
     )} - ${endDate.toLocaleDateString("en-US", options)}`;
   };
 
-  // Calendar functions
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -200,48 +290,49 @@ const PaymentTracking = () => {
     );
   };
 
-  const handleEdit = (invoice) => {
-    navigate('/add_bill', { state: { invoice } });
-    setActiveMenu(null); 
+  const handleEdit = (payment) => {
+    // Navigate to edit page with payment data
+    navigate('/add_bill', { state: { payment } });
+    setActiveMenu(null);
   };
 
-  // Handle Delete action
-  const handleDelete = (invoice) => {
-    setSelectedInvoice(invoice);
+  const handleDelete = (payment) => {
+    setSelectedPayment(payment);
     setDeleteModalOpen(true);
-    setActiveMenu(null); // Close the action menu
+    setActiveMenu(null);
   };
 
-  // Confirm delete
-  const confirmDelete = async (invoice) => {
+  const confirmDelete = async (payment) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/invoices/${invoice.id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/payments/${payment.id}`,
+        {
+          method: 'DELETE',
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to delete invoice');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete payment');
       }
 
-      // Remove the invoice from the payments array
+      // Remove the payment from state
       setPayments((prevPayments) =>
-        prevPayments.filter((p) => p.id !== invoice.id)
+        prevPayments.filter((p) => p.id !== payment.id)
       );
       setDeleteModalOpen(false);
-      setSelectedInvoice(null);
+      setSelectedPayment(null);
     } catch (err) {
-      console.error('Error deleting invoice:', err);
-      alert('Failed to delete invoice. Please try again.');
+      console.error('Error deleting payment:', err);
+      alert(err.message || 'Failed to delete payment. Please try again.');
     }
   };
 
-  // Close delete modal
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
-    setSelectedInvoice(null);
+    setSelectedPayment(null);
   };
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -268,12 +359,10 @@ const PaymentTracking = () => {
       year: "numeric",
     });
 
-    // Empty cells for days before the month starts
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
     }
 
-    // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(
         currentMonth.getFullYear(),
@@ -330,20 +419,19 @@ const PaymentTracking = () => {
     );
   };
 
-  // Render action menu for each payment row
   const renderActionMenu = (payment) => {
     if (activeMenu !== payment.id) return null;
 
     return (
       <div className="action-dropdown">
         <button className="action-item" onClick={() => handleEdit(payment)}>
-          Edit Invoice
+          Edit Payment
         </button>
         <button
           className="action-item danger"
           onClick={() => handleDelete(payment)}
         >
-          Delete Invoice
+          Delete Payment
         </button>
       </div>
     );
@@ -351,12 +439,9 @@ const PaymentTracking = () => {
 
   return (
     <div className="payments-page">
-
-      {/* Main Content */}
       <main className="payments-main">
         <h1 className="page-title">Payment Tracking & History</h1>
 
-        {/* Stats Cards */}
         <div className="stats-grid">
           <div className="stat-card">
             <p className="stat-label">Total Outstanding Balance</p>
@@ -372,14 +457,13 @@ const PaymentTracking = () => {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="filters-container">
           <div className="filters-row">
             <div className="search-wrapper">
               <Search className="search-icon" size={20} />
               <input
                 type="text"
-                placeholder="Search by patient name or ID"
+                placeholder="Search by patient name"
                 className="search-input"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -475,13 +559,11 @@ const PaymentTracking = () => {
           </div>
         </div>
 
-        {/* Payments Table */}
         <div className="table-container">
           <table className="payments-table">
             <thead>
               <tr>
                 <th>Patient Name</th>
-                <th>Invoice #</th>
                 <th>Date</th>
                 <th>Services Rendered</th>
                 <th>Total Charge</th>
@@ -494,21 +576,22 @@ const PaymentTracking = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>
-                    Loading invoices...
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                    Loading payments...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
                     {error}
+                    <br />
+                    <small>Check browser console for details</small>
                   </td>
                 </tr>
               ) : filteredPayments.length > 0 ? (
                 filteredPayments.map((payment) => (
                   <tr key={payment.id}>
                     <td className="patient-name">{payment.patientName}</td>
-                    <td className="invoice-number">{payment.invoiceNum}</td>
                     <td className="service-date">{payment.date}</td>
                     <td className="service-text">{payment.services}</td>
                     <td className="amount-text">
@@ -555,7 +638,7 @@ const PaymentTracking = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9">
+                  <td colSpan="8">
                     <div className="empty-state">
                       <div className="empty-state-icon">
                         <Search size={48} />
@@ -573,12 +656,11 @@ const PaymentTracking = () => {
         </div>
       </main>
 
-      {/* Delete Modal */}
       <DeleteModal
         isOpen={deleteModalOpen}
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
-        invoice={selectedInvoice}
+        invoice={selectedPayment}
       />
     </div>
   );

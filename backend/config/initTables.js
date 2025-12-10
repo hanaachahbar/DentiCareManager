@@ -52,20 +52,22 @@ const initializeTables = (db) => {
     });
 
     // APPOINTMENT TABLE
-    db.run(`
-      CREATE TABLE IF NOT EXISTS Appointment (
-        appointment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        service_id INTEGER,
-        appointment_date TEXT NOT NULL,
-        status TEXT CHECK(status IN ('cancelled', 'pending', 'checked-in')),
-        description TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (service_id) REFERENCES Services(service_id) ON DELETE CASCADE
-      )
-    `, (err) => {
-      if (err) console.error("❌ Appointment table:", err.message);
-      else console.log("✓ Appointment table ready");
-    });
+// APPOINTMENT TABLE
+db.run(`
+  CREATE TABLE IF NOT EXISTS Appointment (
+    appointment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    service_id INTEGER,
+    appointment_date TEXT NOT NULL,
+    appointment_time TEXT,
+    status TEXT CHECK(status IN ('cancelled', 'pending', 'checked-in')),
+    description TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (service_id) REFERENCES Services(service_id) ON DELETE CASCADE
+  )
+`, (err) => {
+  if (err) console.error("❌ Appointment table:", err.message);
+  else console.log("✓ Appointment table ready");
+});
 
     // DOCUMENTS TABLE
     db.run(`

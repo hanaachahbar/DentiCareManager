@@ -16,19 +16,19 @@ exports.createPayment = (req, res) => {
   // Check if service exists
   db.get("SELECT * FROM Services WHERE service_id = ?", [service_id], (err, service) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: `Database error: ${err.message}` });
     }
     if (!service) {
-      return res.status(404).json({ error: "Service not found" });
+      return res.status(404).json({ error: `Service with ID ${service_id} not found. Please check if the service exists.` });
     }
 
     // Check if payment already exists for this service
     db.get("SELECT * FROM Payment WHERE service_id = ?", [service_id], (err, existingPayment) => {
       if (err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: `Database error: ${err.message}` });
       }
       if (existingPayment) {
-        return res.status(400).json({ error: "Payment already exists for this service" });
+        return res.status(400).json({ error: `Payment already exists for service_id ${service_id}. Each service can only have one payment record. Update the existing payment instead.` });
       }
 
       // Create payment
@@ -39,7 +39,7 @@ exports.createPayment = (req, res) => {
 
       db.run(query, [service_id, total_amount, description], function (err) {
         if (err) {
-          return res.status(500).json({ error: err.message });
+          return res.status(500).json({ error: `Failed to create payment: ${err.message}` });
         }
 
         res.status(201).json({
