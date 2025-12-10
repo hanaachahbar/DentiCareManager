@@ -40,7 +40,7 @@ export default function Dashboard() {
       for(var i=0; i<max_length; i++) {
         const patient = response.data[i];
         patient_list.push(
-          {id: patient['patient_id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: 'Today'}
+          {id: patient['patient_id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: patient.created_at.split(" ")[0]}
         );
       }
       setNewPatients(patient_list);
