@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/navbar/navbar"; // Only if Navbar.js exists
-
+ // Only if add_new_service.jsx exists
 import Dashboard from "./pages/dashboard";
 import AddPatient from "./pages/add_patient";
 import DentalLabs from "./pages/dental_labs";
@@ -41,6 +41,7 @@ function App() {
           <Route path="/emergency_reschedule" element={<EmergencyReschedule2 />} />
           <Route path="/add_bill" element={<AddBillForm />} />
           <Route path="/prescription_management" element={<PrescriptionManagement />} />
+          
         </Routes>
       </div>
     </Router>

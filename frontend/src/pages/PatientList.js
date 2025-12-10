@@ -126,7 +126,7 @@ const PatientList = () => {
 
   // Handle patient click
   const handlePatientClick = (patientId) => {
-    navigate(`/patient/${patientId}`);
+    navigate(`/patient_profile/${patientId}`);
   };
 
   // Generate page numbers

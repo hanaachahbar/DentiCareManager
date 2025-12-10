@@ -57,7 +57,7 @@ const PatientProfile = () => {
   });
 
   const handleServiceClick = (serviceId) => {
-    navigate(`/service/${serviceId}`);
+    navigate(`/service-details`);
   };
 
   const openAddServiceModal = () => {

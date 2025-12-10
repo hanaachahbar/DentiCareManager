@@ -12,6 +12,7 @@ const ServiceDetails = () => {
     patientId: 'PT35-87654',
     description:
       'Orthodontic treatment plan focused on alignment and bite correction. Includes periodic reviews and adjustments.',
+    totalPrice: '$750',
   };
 
   const [appointments, setAppointments] = useState([
@@ -101,19 +102,17 @@ const ServiceDetails = () => {
   };
 
   // Navigation to other pages
-  const handleAddPrescription = (appointmentId) => {
-    // you can pass appointmentId in the URL or state if you want
+  const handleAddPrescription = () => {
     window.location.href = `/prescription_management`;
   };
 
-  const handleAddBill = (appointmentId) => {
+  const handleAddBill = () => {
     window.location.href = `/add_bill`;
   };
 
   // File handling: open picker and append selected files
   const triggerFilePicker = (appointmentId) => {
     if (!fileInputRef.current) return;
-    // store the appointment id on the element so we know where to add files
     fileInputRef.current.dataset.appointmentId = appointmentId;
     fileInputRef.current.click();
   };
@@ -137,7 +136,6 @@ const ServiceDetails = () => {
       )
     );
 
-    // clear input so same file can be chosen again if needed
     event.target.value = '';
   };
 
@@ -171,9 +169,19 @@ const ServiceDetails = () => {
           </button>
         </header>
 
-        {/* Description */}
+        {/* Description + total price */}
         <section className="service-description-card">
-          <h2 className="section-heading">Service overview</h2>
+          <div className="service-desc-header-row">
+            <h2 className="section-heading">Service overview</h2>
+            {service.totalPrice && (
+              <div className="service-price-pill">
+                <span className="service-price-label">Total price</span>
+                <span className="service-price-value">
+                  {service.totalPrice}
+                </span>
+              </div>
+            )}
+          </div>
           <p className="service-description-text">{service.description}</p>
         </section>
 
@@ -252,7 +260,6 @@ const ServiceDetails = () => {
                     </div>
                   )}
 
-                  {/* Add file button always visible so user can add more */}
                   <button
                     className="panel-empty-btn panel-empty-inline"
                     onClick={() => triggerFilePicker(apt.id)}
