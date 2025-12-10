@@ -451,10 +451,6 @@ const PaymentTracking = () => {
             <p className="stat-label">Total Revenue (This Month)</p>
             <p className="stat-value">{formatCurrency(totalRevenue)}</p>
           </div>
-          <div className="stat-card">
-            <p className="stat-label">Overdue Invoices</p>
-            <p className="stat-value highlight">{overdueInvoices}</p>
-          </div>
         </div>
 
         <div className="filters-container">
@@ -616,23 +612,6 @@ const PaymentTracking = () => {
                       >
                         {payment.status}
                       </span>
-                    </td>
-                    <td>
-                      <div className="action-menu-wrapper">
-                        <button
-                          className="action-menu-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveMenu(
-                              activeMenu === payment.id ? null : payment.id
-                            );
-                          }}
-                          aria-label="More actions"
-                        >
-                          <MoreVertical size={20} />
-                        </button>
-                        {renderActionMenu(payment)}
-                      </div>
                     </td>
                   </tr>
                 ))
