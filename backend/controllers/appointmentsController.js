@@ -2,12 +2,22 @@ const db = require("../config/db");
 
 // Create an appointment
 exports.createAppointment = (req, res) => {
-  const { service_id, appointment_date, status, description } = req.body;
+  const { service_id, appointment_date, appointment_time, status, description } = req.body;
 
   if (!service_id || !appointment_date) {
     return res.status(400).json({ 
       error: "service_id and appointment_date are required" 
     });
+  }
+
+  // Validate time format if provided (HH:MM)
+  if (appointment_time) {
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(appointment_time)) {
+      return res.status(400).json({ 
+        error: "Invalid time format. Use HH:MM (e.g., 09:12)" 
+      });
+    }
   }
 
   // Validate status if provided
@@ -31,11 +41,11 @@ exports.createAppointment = (req, res) => {
 
     // Create appointment
     const sql = `
-      INSERT INTO Appointment (service_id, appointment_date, status, description)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO Appointment (service_id, appointment_date, appointment_time, status, description)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
-    db.run(sql, [service_id, appointment_date, appointmentStatus, description || ''], function(err) {
+    db.run(sql, [service_id, appointment_date, appointment_time || null, appointmentStatus, description || ''], function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -85,7 +95,7 @@ exports.getAllAppointments = (req, res) => {
     FROM Appointment a
     JOIN Services s ON a.service_id = s.service_id
     JOIN Patient p ON s.patient_id = p.patient_id
-    ORDER BY a.appointment_date DESC
+    ORDER BY a.appointment_date DESC, a.appointment_time DESC
   `;
 
   db.all(query, [], (err, rows) => {
@@ -204,7 +214,7 @@ exports.getAppointmentsByServiceId = (req, res) => {
       JOIN Services s ON a.service_id = s.service_id
       JOIN Patient p ON s.patient_id = p.patient_id
       WHERE a.service_id = ?
-      ORDER BY a.appointment_date DESC
+      ORDER BY a.appointment_date DESC, a.appointment_time DESC
     `;
 
     db.all(query, [service_id], (err, appointments) => {
@@ -245,7 +255,7 @@ exports.getAppointmentsByPatientId = (req, res) => {
       FROM Appointment a
       JOIN Services s ON a.service_id = s.service_id
       WHERE s.patient_id = ?
-      ORDER BY a.appointment_date DESC
+      ORDER BY a.appointment_date DESC, a.appointment_time DESC
     `;
 
     db.all(query, [patient_id], (err, appointments) => {
@@ -269,7 +279,7 @@ exports.getAppointmentsByPatientId = (req, res) => {
 // Update appointment
 exports.updateAppointment = (req, res) => {
   const { id } = req.params;
-  const { appointment_date, status, description } = req.body;
+  const { appointment_date, appointment_time, status, description } = req.body;
 
   db.get("SELECT * FROM Appointment WHERE appointment_id = ?", [id], (err, appointment) => {
     if (err) {
@@ -285,6 +295,17 @@ exports.updateAppointment = (req, res) => {
     if (appointment_date !== undefined) {
       updates.push("appointment_date = ?");
       values.push(appointment_date);
+    }
+
+    if (appointment_time !== undefined) {
+      // Validate time format if provided
+      if (appointment_time && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(appointment_time)) {
+        return res.status(400).json({ 
+          error: "Invalid time format. Use HH:MM (e.g., 09:12)" 
+        });
+      }
+      updates.push("appointment_time = ?");
+      values.push(appointment_time);
     }
 
     if (status !== undefined) {
@@ -391,7 +412,7 @@ exports.getAppointmentsByStatus = (req, res) => {
     JOIN Services s ON a.service_id = s.service_id
     JOIN Patient p ON s.patient_id = p.patient_id
     WHERE a.status = ?
-    ORDER BY a.appointment_date DESC
+    ORDER BY a.appointment_date DESC, a.appointment_time DESC
   `;
 
   db.all(query, [status], (err, appointments) => {
@@ -423,7 +444,7 @@ exports.getUpcomingAppointments = (req, res) => {
     JOIN Patient p ON s.patient_id = p.patient_id
     WHERE a.appointment_date >= date('now')
     AND a.status != 'cancelled'
-    ORDER BY a.appointment_date ASC
+    ORDER BY a.appointment_date ASC, a.appointment_time ASC
   `;
 
   db.all(query, [], (err, appointments) => {

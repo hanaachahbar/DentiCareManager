@@ -44,7 +44,6 @@ const PaymentTracking = () => {
         const transformedData = data.map(invoice => ({
           id: invoice.invoice_id,
           patientName: invoice.patientName || 'Unknown Patient',
-          invoiceNum: invoice.invoiceNum,
           date: new Date(invoice.date).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -86,8 +85,7 @@ const PaymentTracking = () => {
   const filteredPayments = payments
     .filter((payment) => {
       const matchesSearch =
-        payment.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.invoiceNum.toLowerCase().includes(searchTerm.toLowerCase());
+        payment.patientName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
         statusFilter === "All" || payment.status === statusFilter;
 
@@ -379,7 +377,7 @@ const PaymentTracking = () => {
               <Search className="search-icon" size={20} />
               <input
                 type="text"
-                placeholder="Search by patient name or ID"
+                placeholder="Search by patient name"
                 className="search-input"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -481,7 +479,6 @@ const PaymentTracking = () => {
             <thead>
               <tr>
                 <th>Patient Name</th>
-                <th>Invoice #</th>
                 <th>Date</th>
                 <th>Services Rendered</th>
                 <th>Total Charge</th>
@@ -494,13 +491,13 @@ const PaymentTracking = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
                     Loading invoices...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
                     {error}
                   </td>
                 </tr>
@@ -508,7 +505,6 @@ const PaymentTracking = () => {
                 filteredPayments.map((payment) => (
                   <tr key={payment.id}>
                     <td className="patient-name">{payment.patientName}</td>
-                    <td className="invoice-number">{payment.invoiceNum}</td>
                     <td className="service-date">{payment.date}</td>
                     <td className="service-text">{payment.services}</td>
                     <td className="amount-text">
@@ -555,7 +551,7 @@ const PaymentTracking = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9">
+                  <td colSpan="8">
                     <div className="empty-state">
                       <div className="empty-state-icon">
                         <Search size={48} />
