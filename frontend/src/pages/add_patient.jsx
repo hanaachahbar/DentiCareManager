@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/add_patient.css';
 import { UserRound, CloudUpload, Bold, Plus, XCircle, File } from 'lucide-react';
 import axios from 'axios';
+import { useParams, UseParams } from 'react-router-dom';
 
 export default function AddPatient() {
+  const { id } = useParams();
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,6 +20,43 @@ export default function AddPatient() {
     notes: '',
     currentMedications: ''
   });
+
+  useEffect(() => {
+    if(!id) return;
+
+    async function fetchPatientInfo() {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/patients/${id}`);
+        if(!response.data)
+          return;
+
+        const p = response.data;
+        setFormData({
+          firstName: p.first_name || "",
+          lastName: p.last_name || "",
+          dateOfBirth: p.date_of_birth || "",
+          gender: p.gender || "",
+          phoneNumber: p.phone_number || "",
+          emailAddress: p.email || "",
+          city: p.city || "",
+          Address: p.address || "",
+          emergencyCall: p.emergency_call || "",
+          notes: p.notes || "",
+          currentMedications: p.current_medications || ""
+        });
+
+        setAllergies(p.allergies || []);
+        setHereditary(p.hereditary_conditions || []);
+        setChronicConditions(p.chronic_conditions || []);
+      }
+      catch(error) {
+        console.log("Error", error);
+      }
+    }
+
+    fetchPatientInfo();
+  }, [id]);
+
 
   const cities = [
     "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna",
@@ -117,12 +157,36 @@ export default function AddPatient() {
 
   const handleSubmit = async () => {
     if(verifyInfo()) {
-      //console.log('Form submitted:', { ...formData, allergies, chronicConditions, hereditary });
       const patientData = { ...formData, allergies, chronicConditions, hereditary };
       try {
-        const response = await axios.post('http://localhost:5000/api/patients', patientData);
-        if(response.data.status) {
-          console.log(response.data.patient_data);
+        if(!id) {
+          const response = await axios.post('http://localhost:5000/api/patients', patientData);
+          if(response.data.status) {
+            console.log(response.data.patient_data);
+          }
+        }
+        else {
+          const response = await axios.put(`http://localhost:5000/api/patients/${id}`,
+            {
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              date_of_birth: formData.dateOfBirth,
+              gender: formData.gender,
+              phone_number: formData.phoneNumber,
+              email: formData.emailAddress,
+              address: formData.Address,
+              city: formData.city,
+              emergency_call: formData.emergencyCall,
+              notes: formData.notes,
+              current_medications: formData.currentMedications,
+              allergies: allergies,
+              chronic_conditions: chronicConditions,
+              hereditary_conditions: hereditary
+            }
+          );
+          if(response.data) {
+            console.log(response.data);
+          }
         }
         alert('Patient saved successfully!');
       }
@@ -419,7 +483,7 @@ export default function AddPatient() {
       <div className="form-actions">
         <button type="button" className="cancel-btn">Cancel</button>
         <button type="button" className="save-btn" onClick={handleSubmit}>
-          Save Patient
+          {id ? "Save": "Save Patient"}
         </button>
       </div>
 

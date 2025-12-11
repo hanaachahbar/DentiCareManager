@@ -7,13 +7,8 @@ import { useEffect, useState } from 'react';
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const appointments = [
-    { id: 1, name: 'John Doe', time: '10:30 AM', type: 'Routine Check-up', status: 'Checked-in', initials: getInitials('John Doe') },
-    { id: 2, name: 'Lisa Smith', time: '11:00 AM', type: 'Filling', status: 'Pending', initials: getInitials("Lisa Smith") },
-    { id: 3, name: 'Michael Johnson', time: '12:15 PM', type: 'Teeth Whitening', status: 'Pending', initials: getInitials("Michael Johnson") },
-    { id: 4, name: 'Emily Williams', time: '2:00 PM', type: 'Consultation', status: 'Pending', initials: getInitials('Emily Williams') },
-    { id: 5, name: 'Chris Brown', time: '3:30 PM', type: 'Root Canal', status: 'Pending', initials: getInitials('Chris Brown') }
-  ];
+  const [appointments, setAppointments] = useState([]);
+  const [totalAppointments, setTotalAppointments] = useState(0);
 
   function getInitials(name) {
     var initial = '';
@@ -23,11 +18,6 @@ export default function Dashboard() {
     }
   }
 
-  /*var newPatients = [
-    { name: 'Jane Smith', registered: 'Today' },
-    { name: 'Robert Brown', registered: 'Today' },
-    { name: 'Danil Ouakli', registered: 'Today' }
-  ];*/
 
   const [newPatients, setNewPatients] = useState([]);
 
@@ -40,19 +30,42 @@ export default function Dashboard() {
       for(var i=0; i<max_length; i++) {
         const patient = response.data[i];
         patient_list.push(
-          {id: patient['patient_id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: 'Today'}
+          {id: patient['patient_id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: patient.created_at.split(" ")[0]}
         );
       }
       setNewPatients(patient_list);
 
     }
     catch(error) {
-      console.log("Error:", error);
+      console.log("Patients Error:", error);
+    }
+  }
+
+  async function getAppointments() {
+    try {
+      const response = await axios.get('http:///localhost:5000/api/appointments/upcoming');
+      console.log("Upcoming Appintments:", response.data);
+      if(response.data.count == 0) return;
+
+      const A = response.data.appointments;
+      setTotalAppointments(response.data.count);
+      setAppointments(A.slice(0, 6).map(ap => ({
+        id: ap.appointment_id,
+        name: ap.first_name + ' ' + ap.last_name,
+        time: ap.appointment_date,
+        type: ap.service_name,
+        status: ap.status,
+        initials: getInitials(ap.first_name + ' ' + ap.last_name)
+      })));
+    }
+    catch(error) {
+      console.log("Appointments Error", error);
     }
   }
 
   useEffect(() => {
     getNewPatients();
+    getAppointments();
   }, []);
 
   function getFullFormattedDate() {
@@ -101,7 +114,7 @@ export default function Dashboard() {
           
           <div className="dashboard-stat-item">
             <div className="stat-label">Total Appointments</div>
-            <div className="stat-value">12</div>
+            <div className="stat-value">{totalAppointments}</div>
           </div>
 
           <div className="dashboard-stat-item">

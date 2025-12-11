@@ -4,7 +4,14 @@ const db = require("../config/db");
 exports.getPatients = (req, res) => {
   db.all("SELECT * FROM Patient ORDER BY created_at DESC", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
+
+    const formattedRows = rows.map(patient => ({
+      ...patient,
+      allergies: patient.allergies ? JSON.parse(patient.allergies) : [],
+      chronic_conditions: patient.chronic_conditions ? JSON.parse(patient.chronic_conditions) : [],
+      hereditary_conditions: patient.hereditary_conditions ? JSON.parse(patient.hereditary_conditions) : []
+    }));
+    res.json(formattedRows);
   });
 };
 
@@ -15,7 +22,14 @@ exports.getPatientById = (req, res) => {
   db.get("SELECT * FROM Patient WHERE patient_id = ?", [id], (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!row) return res.status(404).json({ error: "Patient not found" });
-    res.json(row);
+
+    const parsedPatient = {
+      ...row,
+      allergies: row.allergies ? JSON.parse(row.allergies) : [],
+      chronic_conditions: row.chronic_conditions ? JSON.parse(row.chronic_conditions) : [],
+      hereditary_conditions: row.hereditary_conditions ? JSON.parse(row.hereditary_conditions) : []
+    };
+    res.json(parsedPatient);
   });
 };
 
@@ -39,8 +53,8 @@ exports.addPatient = (req, res) => {
     firstName, lastName, dateOfBirth || null, gender || null,
     phoneNumber || null, emergencyCall || null, emailAddress || null,
     Address || null, city || null, notes || null,
-    allergies || null, chronicConditions || null, hereditary || null,
-    currentMedications || null
+    JSON.stringify(allergies || []), JSON.stringify(chronicConditions || []),
+    JSON.stringify(hereditary || []), currentMedications || null
   ];
 
   db.run(sql, values, function(err) {
@@ -67,8 +81,14 @@ exports.updatePatient = (req, res) => {
   const values = [];
 
   for (let key in fields) {
+    let value = fields[key];
+    // Convert arrays to JSON strings
+    if (key === "allergies" || key === "chronic_conditions" || key === "hereditary_conditions") {
+      value = JSON.stringify(value || []);
+    }
+
     updates.push(`${key} = ?`);
-    values.push(fields[key]);
+    values.push(value);
   }
 
   if (updates.length === 0) {
@@ -77,15 +97,26 @@ exports.updatePatient = (req, res) => {
 
   values.push(id);
 
-  db.run(`UPDATE Patient SET ${updates.join(", ")} WHERE patient_id = ?`, values, function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    if (this.changes === 0) return res.status(404).json({ error: "Patient not found" });
-
-    db.get("SELECT * FROM Patient WHERE patient_id = ?", [id], (err, row) => {
+  db.run(
+    `UPDATE Patient SET ${updates.join(", ")} WHERE patient_id = ?`,
+    values,
+    function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json(row);
-    });
-  });
+      if (this.changes === 0) return res.status(404).json({ error: "Patient not found" });
+
+      db.get("SELECT * FROM Patient WHERE patient_id = ?", [id], (err, row) => {
+        if(err) return res.status(500).json({ error: err.message });
+        const parsedPatient = {
+          ...row,
+          allergies: row.allergies ? JSON.parse(row.allergies) : [],
+          chronic_conditions: row.chronic_conditions ? JSON.parse(row.chronic_conditions) : [],
+          hereditary_conditions: row.hereditary_conditions ? JSON.parse(row.hereditary_conditions) : []
+        };
+
+        res.json(parsedPatient);
+      });
+    }
+  );
 };
 
 // DELETE patient
