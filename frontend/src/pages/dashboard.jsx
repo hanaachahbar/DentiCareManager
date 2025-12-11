@@ -105,6 +105,16 @@ export default function Dashboard() {
     }
   }
 
+  async function getTotalCompletedServices() {
+    try {
+      const response = await axios.get('http://localhost:5000/api/services/completeServices');
+      setCompletedServices(response.data.total);
+    }
+    catch(error) {
+      console.log("Getting total completed services Error: ", error);
+    }
+  }
+
   useEffect(() => {
     getNewPatients();
     getAppointments();
