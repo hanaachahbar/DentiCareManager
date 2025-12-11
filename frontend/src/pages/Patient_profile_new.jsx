@@ -1,3 +1,4 @@
+// src/components/PatientProfile.jsx
 import React, { useState, useEffect } from 'react';
 import { User, Calendar, Download, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -473,6 +474,7 @@ const PatientProfile = () => {
             </div>
 
             <div className="modal-body">
+              {/* Personal Details Section */}
               <div className="form-section">
                 <h3 className="form-section-title">Personal Details</h3>
                 <div className="form-grid">
