@@ -1,6 +1,6 @@
 import '../styles/dashboard.css';
-import { UserPlus, CalendarPlus, ClipboardList, List } from 'lucide-react';
-import { data, useNavigate } from 'react-router-dom';
+import { UserPlus, CalendarPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
@@ -9,12 +9,14 @@ export default function Dashboard() {
 
   const [appointments, setAppointments] = useState([]);
   const [totalAppointments, setTotalAppointments] = useState(0);
+  const [dailyAmount, setDailyAmount] = useState(0);
+  const [completedServices, setCompletedServices] = useState(0);
 
   function getInitials(name) {
     var initial = '';
     for(var i=0; i<name.length; i++) {
-      if(i==0) initial += name[i].toUpperCase();
-      if(name[i] == ' ') return initial + name[i+1].toUpperCase();
+      if(i===0) initial += name[i].toUpperCase();
+      if(name[i] === ' ') return initial + name[i+1].toUpperCase();
     }
   }
 
@@ -43,12 +45,11 @@ export default function Dashboard() {
 
   async function getAppointments() {
     try {
-      const response = await axios.get('http:///localhost:5000/api/appointments/upcoming');
-      console.log("Upcoming Appintments:", response.data);
-      if(response.data.count == 0) return;
+      const response = await axios.get('http://localhost:5000/api/appointments/upcoming');
+      console.log("Upcoming Appointments:", response.data.appointments);
+      if(response.data.count === 0) return;
 
       const A = response.data.appointments;
-      setTotalAppointments(response.data.count);
       setAppointments(A.slice(0, 6).map(ap => ({
         id: ap.appointment_id,
         name: ap.first_name + ' ' + ap.last_name,
@@ -59,13 +60,46 @@ export default function Dashboard() {
       })));
     }
     catch(error) {
-      console.log("Appointments Error", error);
+      console.log("Upcoming Appointments Error", error);
+    }
+  }
+
+  async function getAppointmentsNumber() {
+    try {
+      const response = await axios.get('http://localhost:5000/api/appointments');
+      setTotalAppointments(response.data.count);
+    }
+    catch(error) {
+      console.log("Getting total appointments Error: ", error);
+    }
+  }
+
+  async function getdailyRevenue() {
+    try {
+      const response = await axios.get('http://localhost:5000/api/invoices/total-amount');
+      setDailyAmount(response.data.total);
+    }
+    catch(error) {
+      console.log("Getting daily revenue Error: ", error);
+    }
+  }
+
+  async function getTotalCompletedServices() {
+    try {
+      const response = await axios.get('http://localhost:5000/api/services/completeServices');
+      setCompletedServices(response.data.total);
+    }
+    catch(error) {
+      console.log("Getting total completed services Error: ", error);
     }
   }
 
   useEffect(() => {
     getNewPatients();
     getAppointments();
+    getAppointmentsNumber();
+    getdailyRevenue();
+    getTotalCompletedServices();
   }, []);
 
   function getFullFormattedDate() {
@@ -119,12 +153,12 @@ export default function Dashboard() {
 
           <div className="dashboard-stat-item">
             <div className="stat-label">Today's Revenue</div>
-            <div className="stat-value">$1,500</div>
+            <div className="stat-value">{dailyAmount} DA</div>
           </div>
 
           <div className="dashboard-stat-item">
             <div className="stat-label">Completed Treatments</div>
-            <div className="stat-value">8</div>
+            <div className="stat-value">{completedServices}</div>
           </div>
         </section>
 

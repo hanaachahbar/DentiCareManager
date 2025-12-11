@@ -323,3 +323,12 @@ exports.deleteService = (req, res) => {
   });
 };
 
+
+// get total completed services
+exports.getTotalCompletedServices = (req, res) => {
+  const sql = "SELECT COUNT(*) AS total FROM Services WHERE status = 'not_active'";
+  db.get(sql, [], (err, row) => {
+    if(err) return res.status(500).json({ error: err.message });
+    res.json({ total: row.total || 0 });
+  });
+};

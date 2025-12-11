@@ -9,6 +9,9 @@ router.post("/", invoiceController.createInvoice);
 // Get all invoices
 router.get("/", invoiceController.getAllInvoices);
 
+// Get total daily amount from invoices
+router.get("/total-amount", invoiceController.getdailyAmount);
+
 // Get invoice by ID
 router.get("/:id", invoiceController.getInvoiceById);
 
