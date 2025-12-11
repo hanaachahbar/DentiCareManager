@@ -54,7 +54,7 @@ const PatientList = () => {
         allergies: patient.allergies || 'None',
         chronique: patient.chronic_conditions || patient.chronique || 'None',
         hereditaire: patient.hereditary_conditions || patient.hereditaire || 'None',
-        formatted_dob: patient.formatted_dob || patient.dob || 'N/A',
+        formatted_dob: patient.date_of_birth || patient.dob || 'N/A',
         lastVisit: patient.lastVisit || 'N/A'
       }));
       
@@ -66,189 +66,7 @@ const PatientList = () => {
       console.error('Error fetching patients:', err);
       setError('Failed to load patients. Please try again.');
       
-      // Fallback to sample data if backend is down (for development)
-      const samplePatients = [
-        {
-          patient_id: 1,
-          first_name: 'Laura',
-          last_name: 'Williams',
-          dob: '1985-08-15',
-          formatted_dob: '15-08-1985',
-          phone_number: '(123) 456-7890',
-          allergies: 'Penicillin',
-          chronic_conditions: 'None',
-          hereditary_conditions: 'None',
-          email: 'laura@example.com',
-          lastVisit: '12-05-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 2,
-          first_name: 'John',
-          last_name: 'Doe',
-          dob: '1990-03-22',
-          formatted_dob: '22-03-1990',
-          phone_number: '(234) 567-8901',
-          allergies: 'None',
-          chronic_conditions: 'Hypertension',
-          hereditary_conditions: 'Diabetes',
-          email: 'john@example.com',
-          lastVisit: '20-04-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 3,
-          first_name: 'Mary',
-          last_name: 'Jane',
-          dob: '1982-11-10',
-          formatted_dob: '10-11-1982',
-          phone_number: '(345) 678-9012',
-          allergies: 'Aspirin',
-          chronic_conditions: 'Asthma',
-          hereditary_conditions: 'None',
-          email: 'mary@example.com',
-          lastVisit: '05-06-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 4,
-          first_name: 'Peter',
-          last_name: 'Parker',
-          dob: '1995-06-01',
-          formatted_dob: '01-06-1995',
-          phone_number: '(456) 789-0123',
-          allergies: 'None',
-          chronic_conditions: 'None',
-          hereditary_conditions: 'None',
-          email: 'peter@example.com',
-          lastVisit: '18-05-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 5,
-          first_name: 'Bruce',
-          last_name: 'Wayne',
-          dob: '1978-02-19',
-          formatted_dob: '19-02-1978',
-          phone_number: '(567) 890-1234',
-          allergies: 'Latex',
-          chronic_conditions: 'None',
-          hereditary_conditions: 'Heart Disease',
-          email: 'bruce@example.com',
-          lastVisit: '22-06-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 6,
-          first_name: 'Diana',
-          last_name: 'Prince',
-          dob: '1988-03-15',
-          formatted_dob: '15-03-1988',
-          phone_number: '(678) 901-2345',
-          allergies: 'None',
-          chronic_conditions: 'None',
-          hereditary_conditions: 'None',
-          email: 'diana@example.com',
-          lastVisit: '10-07-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 7,
-          first_name: 'Clark',
-          last_name: 'Kent',
-          dob: '1980-06-18',
-          formatted_dob: '18-06-1980',
-          phone_number: '(789) 012-3456',
-          allergies: 'Kryptonite',
-          chronic_conditions: 'None',
-          hereditary_conditions: 'None',
-          email: 'clark@example.com',
-          lastVisit: '15-08-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 8,
-          first_name: 'Barry',
-          last_name: 'Allen',
-          dob: '1992-09-20',
-          formatted_dob: '20-09-1992',
-          phone_number: '(890) 123-4567',
-          allergies: 'None',
-          chronic_conditions: 'None',
-          hereditary_conditions: 'None',
-          email: 'barry@example.com',
-          lastVisit: '01-09-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 9,
-          first_name: 'Steve',
-          last_name: 'Rogers',
-          dob: '1918-07-04',
-          formatted_dob: '04-07-1918',
-          phone_number: '(901) 234-5678',
-          allergies: 'None',
-          chronic_conditions: 'Enhanced Physiology',
-          hereditary_conditions: 'None',
-          email: 'steve@example.com',
-          lastVisit: '25-09-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 10,
-          first_name: 'Tony',
-          last_name: 'Stark',
-          dob: '1970-05-29',
-          formatted_dob: '29-05-1970',
-          phone_number: '(012) 345-6789',
-          allergies: 'Shellfish',
-          chronic_conditions: 'Shrapnel near heart',
-          hereditary_conditions: 'Heart Disease',
-          email: 'tony@example.com',
-          lastVisit: '30-09-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 11,
-          first_name: 'Natasha',
-          last_name: 'Romanoff',
-          dob: '1984-11-22',
-          formatted_dob: '22-11-1984',
-          phone_number: '(123) 456-7891',
-          allergies: 'None',
-          chronic_conditions: 'Enhanced physiology',
-          hereditary_conditions: 'None',
-          email: 'natasha@example.com',
-          lastVisit: '05-10-2023',
-          status: 'active'
-        },
-        {
-          patient_id: 12,
-          first_name: 'Thor',
-          last_name: 'Odinson',
-          dob: '982-05-25',
-          formatted_dob: '25-05-0982',
-          phone_number: '(234) 567-8902',
-          allergies: 'None',
-          chronic_conditions: 'God of Thunder',
-          hereditary_conditions: 'Asgardian Royalty',
-          email: 'thor@example.com',
-          lastVisit: '10-10-2023',
-          status: 'active'
-        }
-      ].map(patient => ({
-        ...patient,
-        name: `${patient.first_name} ${patient.last_name}`,
-        id: patient.patient_id,
-        contact: patient.phone_number,
-        allergies: patient.allergies,
-        chronique: patient.chronic_conditions,
-        hereditaire: patient.hereditary_conditions
-      }));
       
-      setAllPatients(samplePatients);
-      setFilteredPatients(samplePatients);
-      updateDisplayedPatients(samplePatients, 1);
     } finally {
       setLoading(false);
       initialFetchDone.current = true;
@@ -450,7 +268,7 @@ const PatientList = () => {
                     <th>ALLERGIES</th>
                     <th>CHRONIC CONDITIONS</th>
                     <th>HEREDITARY CONDITIONS</th>
-                    <th>LAST VISIT</th>
+                    {/* <th>LAST VISIT</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -467,12 +285,12 @@ const PatientList = () => {
                           </div>
                         </div>
                       </td>
-                      <td>{formatDate(patient.formatted_dob || patient.dob)}</td>
+                      <td>{formatDate(patient.date_of_birth || patient.dob)}</td>
                       <td>{patient.contact || patient.phone_number || 'N/A'}</td>
                       <td>{patient.allergies || 'None'}</td>
                       <td>{patient.chronique || patient.chronic_conditions || 'None'}</td>
                       <td>{patient.hereditaire || patient.hereditary_conditions || 'None'}</td>
-                      <td>{formatDate(patient.lastVisit)}</td>
+                      {/* <td>{formatDate(patient.lastVisit)}</td> */}
                     </tr>
                   ))}
                 </tbody>
