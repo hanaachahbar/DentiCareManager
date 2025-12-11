@@ -1,43 +1,44 @@
-const express = require('express');
+// routes/documents.js
+const express = require("express");
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const documentsController = require('../controllers/documentsController');
+const documentsController = require("../controllers/documentsController");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads/'));
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
   }
 });
 
-const upload = multer({
+const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
-  fileFilter: (req, file, cb) => {
-    // Allow common file types
-    const allowedMimes = [
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    ];
-    
-    if (allowedMimes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type'));
-    }
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
   }
 });
+
+// Upload documents
+router.post("/upload", upload.array("documents", 10), documentsController.uploadDocuments);
+
+// Get documents for an appointment
+router.get("/appointment/:appointment_id", documentsController.getDocumentsByAppointment);
+
+// Download document
+router.get("/download/:document_id", documentsController.downloadDocument);
+
+// Delete document
+router.delete("/:document_id", documentsController.deleteDocument);
 
 // Upload document for an appointment
 router.post('/', upload.single('file'), documentsController.uploadDocument);

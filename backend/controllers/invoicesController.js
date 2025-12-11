@@ -493,3 +493,12 @@ exports.deleteInvoice = (req, res) => {
     });
   });
 };
+
+
+// get total amount for today
+exports.getdailyAmount = (req, res) => {
+  db.get("SELECT SUM(amount) AS total FROM Invoices WHERE created_at >= date('now')", [], (err, row) => {
+    if(err) return res.status(500).json({ error: err.message });
+    res.json({ total: row.total || 0 });
+  });
+};
