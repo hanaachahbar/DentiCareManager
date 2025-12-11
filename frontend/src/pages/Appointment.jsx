@@ -1,30 +1,101 @@
-import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
-
+// src/components/AppointmentsMainPage.jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, Calendar, Trash2 } from 'lucide-react';
-import '../styles/Appointement.css' ;
+import '../styles/Appointement.css';
 
 const AppointmentsMainPage = () => {
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(new Date(2024, 9, 5));
-  const [currentMonth, setCurrentMonth] = useState(new Date(2024, 9, 1));
+  const location = useLocation();
+
+  // Use actual current date (2025 now) for selectedDate and currentMonth
+  const today = new Date();
+
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [currentMonth, setCurrentMonth] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
   const [viewMode, setViewMode] = useState('daily');
-  
-  const [appointments, setAppointments] = useState([
-    { id: '12345', patient: 'John Doe', date: new Date(2024, 9, 5), time: '09:00 AM', status: 'Confirmed', reason: 'Routine Check-up', description: 'Annual physical examination' },
-    { id: '12346', patient: 'Jane Smith', date: new Date(2024, 9, 5), time: '10:30 AM', status: 'Pending', reason: 'Filling', description: 'Dental filling procedure' },
-    { id: '12347', patient: 'Michael Johnson', date: new Date(2024, 9, 5), time: '02:00 PM', status: 'Confirmed', reason: 'Cleaning', description: 'Routine dental cleaning' },
-    { id: '12348', patient: 'Emily Williams', date: new Date(2024, 9, 4), time: '11:00 AM', status: 'Cancelled', reason: 'Consultation', description: 'Initial consultation' },
-    { id: '12349', patient: 'David Brown', date: new Date(2024, 9, 6), time: '09:30 AM', status: 'Confirmed', reason: 'X-Ray', description: 'Dental X-ray' },
-    { id: '12350', patient: 'Sarah Wilson', date: new Date(2024, 9, 7), time: '01:00 PM', status: 'Pending', reason: 'Blood Test', description: 'Lab work' },
-    { id: '12351', patient: 'Robert Taylor', date: new Date(2024, 9, 10), time: '10:00 AM', status: 'Confirmed', reason: 'Follow-up', description: 'Post-treatment check' },
-    { id: '12352', patient: 'Lisa Anderson', date: new Date(2024, 9, 12), time: '03:00 PM', status: 'Pending', reason: 'Consultation', description: 'New patient' },
-    { id: '12353', patient: 'James Martinez', date: new Date(2024, 9, 15), time: '11:30 AM', status: 'Confirmed', reason: 'Vaccination', description: 'Flu shot' },
-    { id: '12354', patient: 'Maria Garcia', date: new Date(2024, 9, 20), time: '02:30 PM', status: 'Confirmed', reason: 'Checkup', description: 'Routine examination' },
-  ]);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+
+  // Fetch appointments from API
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/appointments');
+      if (!response.ok) throw new Error('Failed to fetch appointments');
+      
+      const data = await response.json();
+      console.log('Fetched appointments:', data); // Debug log
+      let appointmentsList = [];
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        appointmentsList = data;
+      } else if (data.appointments && Array.isArray(data.appointments)) {
+        appointmentsList = data.appointments;
+      }
+
+      console.log('Appointments list:', appointmentsList); // Debug log
+
+      // Transform backend data to frontend format
+      const transformedAppointments = appointmentsList.map((apt) => {
+        const dateObj = new Date(apt.appointment_date);
+        let timeStr = apt.appointment_time || '00:00';
+        
+        // Convert time format HH:MM to display format
+        const [hours, minutes] = timeStr.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        const displayTime = `${displayHour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+
+        // Map status from backend
+        let statusMap = {
+          'pending': 'Pending',
+          'checked-in': 'Confirmed',
+          'cancelled': 'Cancelled'
+        };
+
+        return {
+          id: apt.appointment_id,
+          patient: `${apt.first_name} ${apt.last_name}`,
+          date: dateObj,
+          time: displayTime,
+          status: statusMap[apt.status] || apt.status,
+          reason: apt.service_name || 'General Appointment',
+          description: apt.description || '',
+          appointment_id: apt.appointment_id
+        };
+      });
+
+      console.log('Transformed appointments:', transformedAppointments); // Debug log
+      setAppointments(transformedAppointments);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setError('Failed to load appointments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+    
+    // Refresh appointments when page comes into focus
+    const handleFocus = () => {
+      fetchAppointments();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -33,7 +104,7 @@ const AppointmentsMainPage = () => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
+
     const days = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
@@ -45,17 +116,26 @@ const AppointmentsMainPage = () => {
   };
 
   const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   const formatDateShort = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   const isSameDay = (date1, date2) => {
-    return date1.getDate() === date2.getDate() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getFullYear() === date2.getFullYear();
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
   };
 
   const getWeekStart = (date) => {
@@ -66,7 +146,11 @@ const AppointmentsMainPage = () => {
 
   const getWeekEnd = (date) => {
     const weekStart = getWeekStart(date);
-    return new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6);
+    return new Date(
+      weekStart.getFullYear(),
+      weekStart.getMonth(),
+      weekStart.getDate() + 6
+    );
   };
 
   const isInSameWeek = (date1, date2) => {
@@ -76,29 +160,39 @@ const AppointmentsMainPage = () => {
   };
 
   const isInSameMonth = (date1, date2) => {
-    return date1.getMonth() === date2.getMonth() &&
-           date1.getFullYear() === date2.getFullYear();
+    return (
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
   };
 
   const getFilteredAppointments = () => {
     switch (viewMode) {
       case 'daily':
-        return appointments.filter(apt => isSameDay(apt.date, selectedDate));
+        return appointments.filter((apt) => isSameDay(apt.date, selectedDate));
       case 'weekly':
-        return appointments.filter(apt => isInSameWeek(selectedDate, apt.date));
+        return appointments.filter((apt) =>
+          isInSameWeek(selectedDate, apt.date)
+        );
       case 'monthly':
-        return appointments.filter(apt => isInSameMonth(selectedDate, apt.date));
+        return appointments.filter((apt) =>
+          isInSameMonth(selectedDate, apt.date)
+        );
       default:
         return appointments;
     }
   };
 
   const getTodayAppointments = () => {
-    return appointments.filter(apt => isSameDay(apt.date, selectedDate));
+    return appointments.filter((apt) => isSameDay(apt.date, selectedDate));
   };
 
   const handlePrevMonth = () => {
-    const newMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    const newMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth() - 1,
+      1
+    );
     setCurrentMonth(newMonth);
     if (!isInSameMonth(selectedDate, newMonth)) {
       setSelectedDate(new Date(newMonth.getFullYear(), newMonth.getMonth(), 1));
@@ -106,7 +200,11 @@ const AppointmentsMainPage = () => {
   };
 
   const handleNextMonth = () => {
-    const newMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    const newMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth() + 1,
+      1
+    );
     setCurrentMonth(newMonth);
     if (!isInSameMonth(selectedDate, newMonth)) {
       setSelectedDate(new Date(newMonth.getFullYear(), newMonth.getMonth(), 1));
@@ -125,11 +223,26 @@ const AppointmentsMainPage = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (appointmentToDelete) {
-      setAppointments(appointments.filter(apt => apt.id !== appointmentToDelete.id));
-      setShowDeleteConfirm(false);
-      setAppointmentToDelete(null);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/appointments/${appointmentToDelete.appointment_id}`,
+          { method: 'DELETE' }
+        );
+        
+        if (!response.ok) throw new Error('Failed to delete appointment');
+        
+        setAppointments((prev) =>
+          prev.filter((apt) => apt.id !== appointmentToDelete.id)
+        );
+      } catch (err) {
+        console.error('Error deleting appointment:', err);
+        setError('Failed to delete appointment');
+      } finally {
+        setShowDeleteConfirm(false);
+        setAppointmentToDelete(null);
+      }
     }
   };
 
@@ -139,9 +252,8 @@ const AppointmentsMainPage = () => {
   };
 
   const handleAddAppointmentClick = () => {
-  navigate('/add_appointment');
-};
-;
+    navigate('/add_appointment');
+  };
 
   const filteredAppointments = getFilteredAppointments();
   const todayAppointments = getTodayAppointments();
@@ -154,9 +266,14 @@ const AppointmentsMainPage = () => {
       case 'weekly':
         const weekStart = getWeekStart(selectedDate);
         const weekEnd = getWeekEnd(selectedDate);
-        return `Appointments for ${formatDateShort(weekStart)} - ${formatDateShort(weekEnd)}, ${weekEnd.getFullYear()}`;
+        return `Appointments for ${formatDateShort(
+          weekStart
+        )} - ${formatDateShort(weekEnd)}, ${weekEnd.getFullYear()}`;
       case 'monthly':
-        return `Appointments for ${selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+        return `Appointments for ${selectedDate.toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        })}`;
       default:
         return 'Appointments';
     }
@@ -164,16 +281,60 @@ const AppointmentsMainPage = () => {
 
   return (
     <div className="appointments-container">
+      {loading && (
+        <div className="appointments-wrapper">
+          <div className="appointments-card">
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <p>Loading appointments...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="appointments-wrapper">
+          <div className="appointments-card">
+            <div style={{
+              textAlign: 'center',
+              padding: '40px',
+              color: '#d32f2f',
+              backgroundColor: '#ffebee',
+              borderRadius: '8px'
+            }}>
+              <p>{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  marginTop: '15px',
+                  padding: '8px 16px',
+                  backgroundColor: '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && (
       <div className="appointments-wrapper">
         <div className="appointments-card">
           <div className="appointments-header">
             <h1 className="appointments-title">Appointments</h1>
             <div className="appointments-actions">
-              <button onClick={handleAddAppointmentClick} className="btn btn-primary">
+              <button
+                onClick={handleAddAppointmentClick}
+                className="btn btn-primary"
+              >
                 <Plus className="icon" />
                 Add Appointment
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/emergency_reschedule')}
                 className="btn btn-emergency"
               >
@@ -185,21 +346,27 @@ const AppointmentsMainPage = () => {
 
           <div className="view-mode-selector">
             <div className="view-mode-buttons">
-              <button 
+              <button
                 onClick={() => setViewMode('daily')}
-                className={`view-mode-btn ${viewMode === 'daily' ? 'active' : ''}`}
+                className={`view-mode-btn ${
+                  viewMode === 'daily' ? 'active' : ''
+                }`}
               >
                 Daily
               </button>
-              <button 
+              <button
                 onClick={() => setViewMode('weekly')}
-                className={`view-mode-btn ${viewMode === 'weekly' ? 'active' : ''}`}
+                className={`view-mode-btn ${
+                  viewMode === 'weekly' ? 'active' : ''
+                }`}
               >
                 Weekly
               </button>
-              <button 
+              <button
                 onClick={() => setViewMode('monthly')}
-                className={`view-mode-btn ${viewMode === 'monthly' ? 'active' : ''}`}
+                className={`view-mode-btn ${
+                  viewMode === 'monthly' ? 'active' : ''
+                }`}
               >
                 Monthly
               </button>
@@ -210,13 +377,26 @@ const AppointmentsMainPage = () => {
             <div className="calendar-appointments-grid">
               <div className="calendar-section">
                 <div className="calendar-header">
-                  <button onClick={handlePrevMonth} className="calendar-nav-btn">←</button>
+                  <button
+                    onClick={handlePrevMonth}
+                    className="calendar-nav-btn"
+                  >
+                    ←
+                  </button>
                   <h3 className="calendar-month-title">
-                    {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {currentMonth.toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric',
+                    })}
                   </h3>
-                  <button onClick={handleNextMonth} className="calendar-nav-btn">→</button>
+                  <button
+                    onClick={handleNextMonth}
+                    className="calendar-nav-btn"
+                  >
+                    →
+                  </button>
                 </div>
-                
+
                 <div className="calendar-weekdays">
                   <div>S</div>
                   <div>M</div>
@@ -226,7 +406,7 @@ const AppointmentsMainPage = () => {
                   <div>F</div>
                   <div>S</div>
                 </div>
-                
+
                 <div className="calendar-days">
                   {days.map((day, idx) => (
                     <button
@@ -244,25 +424,36 @@ const AppointmentsMainPage = () => {
 
               <div className="today-appointments-section">
                 <div className="today-header">
-                  <h2 className="today-title">Appointments for {formatDate(selectedDate)}</h2>
+                  <h2 className="today-title">
+                    Appointments for {formatDate(selectedDate)}
+                  </h2>
                 </div>
                 <div className="today-appointments-list">
                   {todayAppointments.length > 0 ? (
-                    todayAppointments.map(apt => (
-                      <div key={apt.id} className={`appointment-card status-${apt.status.toLowerCase()}`}>
+                    todayAppointments.map((apt) => (
+                      <div
+                        key={apt.id}
+                        className={`appointment-card status-${apt.status.toLowerCase()}`}
+                      >
                         <div className="appointment-content">
                           <div className="appointment-time-patient">
                             {apt.time} - {apt.patient}
                           </div>
-                          <div className="appointment-reason">{apt.reason}</div>
+                          <div className="appointment-reason">
+                            {apt.reason}
+                          </div>
                           {apt.status === 'Pending' && (
-                            <div className="appointment-pending-note">(Pending Confirmation)</div>
+                            <div className="appointment-pending-note">
+                              (Pending Confirmation)
+                            </div>
                           )}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="no-appointments">No appointments scheduled</div>
+                    <div className="no-appointments">
+                      No appointments scheduled
+                    </div>
                   )}
                 </div>
               </div>
@@ -285,19 +476,23 @@ const AppointmentsMainPage = () => {
                 </thead>
                 <tbody>
                   {filteredAppointments.length > 0 ? (
-                    filteredAppointments.map(apt => (
+                    filteredAppointments.map((apt) => (
                       <tr key={apt.id}>
                         <td>#{apt.id}</td>
                         <td>{apt.patient}</td>
-                        <td>{formatDate(apt.date)} - {apt.time}</td>
                         <td>
-                          <span className={`status-badge status-${apt.status.toLowerCase()}`}>
+                          {formatDate(apt.date)} - {apt.time}
+                        </td>
+                        <td>
+                          <span
+                            className={`status-badge status-${apt.status.toLowerCase()}`}
+                          >
                             {apt.status}
                           </span>
                         </td>
                         <td>{apt.reason}</td>
                         <td>
-                          <button 
+                          <button
                             onClick={() => handleDeleteClick(apt)}
                             className="delete-btn"
                           >
@@ -308,7 +503,9 @@ const AppointmentsMainPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="no-data">No appointments found</td>
+                      <td colSpan="6" className="no-data">
+                        No appointments found
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -317,17 +514,25 @@ const AppointmentsMainPage = () => {
           </div>
         </div>
       </div>
+      )}
 
       {showDeleteConfirm && (
         <div className="modal-overlay">
           <div className="modal-card">
             <h2 className="modal-title">Confirm Delete</h2>
             <p className="modal-text">
-              Are you sure you want to delete the appointment for <strong>{appointmentToDelete?.patient}</strong> on {appointmentToDelete && formatDate(appointmentToDelete.date)} at {appointmentToDelete?.time}?
+              Are you sure you want to delete the appointment for{' '}
+              <strong>{appointmentToDelete?.patient}</strong> on{' '}
+              {appointmentToDelete && formatDate(appointmentToDelete.date)} at{' '}
+              {appointmentToDelete?.time}?
             </p>
             <div className="modal-actions">
-              <button onClick={cancelDelete} className="btn btn-cancel">Cancel</button>
-              <button onClick={confirmDelete} className="btn btn-delete">Delete</button>
+              <button onClick={cancelDelete} className="btn btn-cancel">
+                Cancel
+              </button>
+              <button onClick={confirmDelete} className="btn btn-delete">
+                Delete
+              </button>
             </div>
           </div>
         </div>

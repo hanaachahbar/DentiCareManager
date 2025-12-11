@@ -461,147 +461,6 @@ const PatientProfile = () => {
           </div>
         </div>
       </div>
-                <div className="patient-avatar">
-                  <User className="avatar-icon" />
-                </div>
-                <h2 className="patient-name">{patient.name}</h2>
-                <p className="patient-id">{patient.id}</p>
-              </div>
-            </div>
-
-            {/* Personal Details */}
-            <div className="card personal-card">
-              <div className="card-header-inline">
-                <h3 className="card-title">Personal details</h3>
-              </div>
-              <div className="personal-grid">
-                <div className="personal-item">
-                  <p className="personal-label">Date of birth</p>
-                  <p className="personal-value">{patient.dateOfBirth}</p>
-                </div>
-                <div className="personal-item">
-                  <p className="personal-label">Contact</p>
-                  <p className="personal-value">{patient.contact}</p>
-                </div>
-                <div className="personal-item">
-                  <p className="personal-label">Email</p>
-                  <p className="personal-value">{patient.email}</p>
-                </div>
-                <div className="personal-item">
-                  <p className="personal-label">Emergency contact</p>
-                  <p className="personal-value">
-                    {patient.emergencyContact}
-                  </p>
-                </div>
-                <div className="personal-item">
-                  <p className="personal-label">Primary dentist</p>
-                  <p className="personal-value">
-                    {patient.primaryDentist}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Medical Information */}
-            <div className="card medical-card">
-              <div className="card-header-inline">
-                <h3 className="card-title">Medical information</h3>
-              </div>
-              <div className="medical-grid">
-                <div className="medical-item">
-                  <p className="medical-label">Allergies</p>
-                  <p className="medical-value medical-danger">
-                    {patient.allergies}
-                  </p>
-                </div>
-                <div className="medical-item">
-                  <p className="medical-label">Chronic conditions</p>
-                  <p className="medical-value">
-                    {patient.chronicConditions}
-                  </p>
-                </div>
-              </div>
-              <div className="medical-notes">
-                <p className="medical-label">Notes</p>
-                <p className="medical-notes-value">{patient.notes}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="right-column">
-            {/* Services */}
-            {services.map((service) => (
-              <div key={service.id} className="card service-card">
-                <div className="service-header-row">
-                  <div>
-                    <h3 className="card-title service-title-strong">
-                      {service.title}
-                    </h3>
-                    {service.totalPayment && (
-                      <p className="service-total-payment">
-                        Total payment: {service.totalPayment}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    className="btn-outline"
-                    onClick={() => handleServiceClick(service.id)}
-                  >
-                    View details
-                  </button>
-                </div>
-
-                <div className="section">
-                  <h4 className="section-title">Last appointment</h4>
-                  {service.appointments.length === 0 ? (
-                    <p className="no-appointments-text">
-                      No appointments yet for this service.
-                    </p>
-                  ) : (
-                    service.appointments.map((apt, idx) => (
-                      <div key={idx} className="appointment-item">
-                        <Calendar className="appointment-icon" />
-                        <div>
-                          <p className="appointment-name-normal">
-                            {apt.name}
-                          </p>
-                          <p className="appointment-date">{apt.date}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {/* Documents */}
-            <div className="card">
-              <div className="card-header">
-                <h3 className="card-title">Documents</h3>
-                <input
-                  type="text"
-                  placeholder="Search documents..."
-                  className="search-input-small"
-                />
-              </div>
-              <div className="documents-list">
-                {documents.map((doc, idx) => (
-                  <div key={idx} className="document-item">
-                    <div>
-                      <p className="document-name">{doc.name}</p>
-                      <p className="document-date">{doc.date}</p>
-                    </div>
-                    <button className="btn-icon">
-                      <Download className="icon-small" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Edit Patient Modal */}
       {isEditModalOpen && (
@@ -620,11 +479,21 @@ const PatientProfile = () => {
                 <h3 className="form-section-title">Personal Details</h3>
                 <div className="form-grid">
                   <div className="form-group">
-                    <label className="form-label">Full Name</label>
+                    <label className="form-label">First Name</label>
                     <input
                       type="text"
-                      name="name"
-                      value={editForm.name}
+                      name="first_name"
+                      value={editForm.first_name}
+                      onChange={handleInputChange}
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Last Name</label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={editForm.last_name}
                       onChange={handleInputChange}
                       className="form-input"
                     />
@@ -632,19 +501,29 @@ const PatientProfile = () => {
                   <div className="form-group">
                     <label className="form-label">Date of Birth</label>
                     <input
-                      type="text"
-                      name="dateOfBirth"
-                      value={editForm.dateOfBirth}
+                      type="date"
+                      name="date_of_birth"
+                      value={editForm.date_of_birth || ''}
                       onChange={handleInputChange}
                       className="form-input"
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Contact</label>
+                    <label className="form-label">Gender</label>
                     <input
                       type="text"
-                      name="contact"
-                      value={editForm.contact}
+                      name="gender"
+                      value={editForm.gender}
+                      onChange={handleInputChange}
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Phone Number</label>
+                    <input
+                      type="text"
+                      name="phone_number"
+                      value={editForm.phone_number}
                       onChange={handleInputChange}
                       className="form-input"
                     />
@@ -663,18 +542,28 @@ const PatientProfile = () => {
                     <label className="form-label">Emergency Contact</label>
                     <input
                       type="text"
-                      name="emergencyContact"
-                      value={editForm.emergencyContact}
+                      name="emergency_call"
+                      value={editForm.emergency_call}
                       onChange={handleInputChange}
                       className="form-input"
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Primary Dentist</label>
+                    <label className="form-label">Address</label>
                     <input
                       type="text"
-                      name="primaryDentist"
-                      value={editForm.primaryDentist}
+                      name="address"
+                      value={editForm.address}
+                      onChange={handleInputChange}
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">City</label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={editForm.city}
                       onChange={handleInputChange}
                       className="form-input"
                     />
@@ -700,8 +589,18 @@ const PatientProfile = () => {
                     <label className="form-label">Chronic Conditions</label>
                     <input
                       type="text"
-                      name="chronicConditions"
-                      value={editForm.chronicConditions}
+                      name="chronic_conditions"
+                      value={editForm.chronic_conditions}
+                      onChange={handleInputChange}
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Current Medications</label>
+                    <input
+                      type="text"
+                      name="current_medications"
+                      value={editForm.current_medications}
                       onChange={handleInputChange}
                       className="form-input"
                     />
@@ -752,35 +651,36 @@ const PatientProfile = () => {
                   <label className="form-label">Service name</label>
                   <input
                     type="text"
-                    name="title"
-                    value={newService.title}
+                    name="service_name"
+                    value={newService.service_name}
                     onChange={handleNewServiceChange}
                     className="form-input"
-                    placeholder="e.g., ODF Treatment"
+                    placeholder="e.g., Root Canal Treatment"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Description</label>
+                  <label className="form-label">Total Cost</label>
+                  <input
+                    type="number"
+                    name="total_cost"
+                    value={newService.total_cost}
+                    onChange={handleNewServiceChange}
+                    className="form-input"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Payment Description (optional)</label>
                   <textarea
-                    name="description"
-                    value={newService.description}
+                    name="payment_description"
+                    value={newService.payment_description}
                     onChange={handleNewServiceChange}
                     className="form-textarea"
                     rows="3"
-                    placeholder="Short description of this service..."
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Total payment</label>
-                  <input
-                    type="text"
-                    name="totalPayment"
-                    value={newService.totalPayment}
-                    onChange={handleNewServiceChange}
-                    className="form-input"
-                    placeholder="$0"
+                    placeholder="Description for payment records..."
                   />
                 </div>
               </div>
