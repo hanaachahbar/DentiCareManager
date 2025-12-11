@@ -1,8 +1,12 @@
-// src/components/ServiceDetails.jsx
-import React, { useRef, useState } from 'react';
+// src/pages/service_details.jsx
+import React, { useRef, useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/service_details.css';
+import axios from 'axios';
 
 const ServiceDetails = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [billModal, setBillModal] = useState({
     isOpen: false,
@@ -11,61 +15,210 @@ const ServiceDetails = () => {
     description: '',
   });
   const fileInputRef = useRef(null);
+  
+  // API base URL
+  const API_URL = 'http://localhost:5000/api';
 
-  const service = {
-    name: 'ODF - Orthodontic Treatments',
-    patientName: 'Jane Doe',
-    patientId: 'PT35-87654',
-    description:
-      'Orthodontic treatment plan focused on alignment and bite correction. Includes periodic reviews and adjustments.',
-    totalPrice: '$750',
-  };
+  // Get serviceId from query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const serviceId = queryParams.get('serviceId');
+  
+  // State for service and appointments
+  const [service, setService] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      dateLabel: '12 Aug 2023',
-      time: '10:00',
-      title: 'Braces adjustment',
-      notes: 'Tightening and bracket inspection.',
-      prescription: {
-        name: 'Prescription 1',
-        date: '12 Aug 2023',
-      },
-      invoice: {
-        amount: '$75',
-        description: 'Adjustment session fee',
-      },
-      files: [
-        { name: 'Progress_Photo_12_Aug.jpg' },
-        { name: 'Adjustment_Report.pdf' },
-      ],
-    },
-    {
-      id: 2,
-      dateLabel: '05 Jun 2023',
-      time: '15:30',
-      title: 'Initial consultation',
-      notes: 'Baseline photos and full assessment.',
-      prescription: null,
-      invoice: null,
-      files: [],
-    },
-  ]);
-
+  // New appointment form
   const [newAppointment, setNewAppointment] = useState({
-    dateLabel: '',
-    time: '',
-    title: '',
-    notes: '',
+    appointment_date: '',
+    appointment_time: '',
+    description: '',
+    status: 'pending'
   });
 
+  // Fetch service details
+  useEffect(() => {
+    const fetchServiceDetails = async () => {
+      if (!serviceId) {
+        setError('No service ID provided in URL. Please access this page with ?serviceId= parameter.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        console.log('Fetching service details for ID:', serviceId);
+        
+        // Fetch service info
+        const serviceResponse = await axios.get(`${API_URL}/services/${serviceId}`);
+        console.log('Service response:', serviceResponse.data);
+        
+        if (!serviceResponse.data) {
+          throw new Error('No service data returned');
+        }
+        
+        const serviceData = serviceResponse.data.service || serviceResponse.data;
+        console.log('Service data:', serviceData);
+        
+        // Fetch appointments for this service
+        let appointmentsData = [];
+        try {
+          const appointmentsResponse = await axios.get(`${API_URL}/appointments/service/${serviceId}`);
+          console.log('Appointments response:', appointmentsResponse.data);
+          appointmentsData = appointmentsResponse.data.appointments || appointmentsResponse.data || [];
+        } catch (appointmentsErr) {
+          console.log('No appointments found or error:', appointmentsErr.message);
+        }
+        
+        // Format service data - check what fields are actually available
+        const formattedService = {
+          service_id: serviceData.service_id,
+          service_name: serviceData.service_name || 'Service',
+          patient_name: `${serviceData.first_name || ''} ${serviceData.last_name || ''}`.trim() || 'Unknown Patient',
+          patient_id: serviceData.patient_id,
+          description: serviceData.description || `Treatment for ${serviceData.first_name || ''} ${serviceData.last_name || ''}`,
+          total_price: serviceData.total_amount || serviceData.total_cost || 0,
+          formatted_total_price: (serviceData.total_amount || serviceData.total_cost) ? 
+            `$${parseFloat(serviceData.total_amount || serviceData.total_cost || 0).toFixed(2)}` : '$0.00',
+          payment_status: serviceData.payment_status || 'unpaid'
+        };
+        
+        console.log('Formatted service:', formattedService);
+        
+        // Process each appointment to get related data
+        const processedAppointments = await Promise.all(
+          appointmentsData.map(async (apt) => {
+            try {
+              console.log('Processing appointment:', apt);
+              
+              // Get prescription for this appointment
+              let prescription = null;
+              try {
+                const prescriptionResponse = await axios.get(`${API_URL}/appointments/${apt.appointment_id || apt.id}`);
+                const prescriptionData = prescriptionResponse.data.prescriptions || [];
+                if (prescriptionData.length > 0) {
+                  prescription = {
+                    name: prescriptionData[0].medication_name || 'Prescription',
+                    date: new Date(apt.appointment_date || apt.date).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })
+                  };
+                }
+              } catch (prescErr) {
+                console.log('No prescription found for appointment', apt.appointment_id || apt.id);
+              }
+
+              // Get invoice for this appointment
+              let invoice = null;
+              try {
+                // Check if appointment has invoice data
+                if (apt.invoice) {
+                  invoice = {
+                    amount: `$${parseFloat(apt.invoice.amount).toFixed(2)}`,
+                    description: apt.invoice.description || 'Appointment fee',
+                    invoice_id: apt.invoice.invoice_id
+                  };
+                }
+              } catch (invoiceErr) {
+                console.log('No invoice found for appointment', apt.appointment_id || apt.id);
+              }
+
+              // Get documents for this appointment
+              let files = [];
+              try {
+                const documentsResponse = await axios.get(`${API_URL}/documents/appointment/${apt.appointment_id || apt.id}`);
+                files = (documentsResponse.data.documents || []).map(doc => ({
+                  name: doc.path,
+                  document_id: doc.document_id
+                }));
+              } catch (docErr) {
+                console.log('No documents found for appointment', apt.appointment_id || apt.id);
+              }
+
+              // Format appointment date
+              const appointmentDate = apt.appointment_date || apt.date || new Date().toISOString().split('T')[0];
+              const formattedDate = new Date(appointmentDate).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              });
+
+              return {
+                id: apt.appointment_id || apt.id,
+                dateLabel: formattedDate,
+                time: apt.appointment_time || apt.time || '10:00',
+                title: apt.description || apt.title || 'Appointment',
+                notes: apt.description || apt.notes || '',
+                status: apt.status || 'pending',
+                prescription: prescription,
+                invoice: invoice,
+                files: files
+              };
+            } catch (error) {
+              console.error('Error processing appointment:', error);
+              return null;
+            }
+          })
+        );
+
+        // Filter out null appointments
+        const validAppointments = processedAppointments.filter(apt => apt !== null);
+        console.log('Valid appointments:', validAppointments);
+
+        setService(formattedService);
+        setAppointments(validAppointments);
+        setError('');
+      } catch (err) {
+        console.error('Error fetching service details:', err.response?.data || err.message);
+        setError(`Failed to load service details: ${err.response?.data?.error || err.message}`);
+        
+        // Use fallback data for development
+        console.log('Using fallback data...');
+        const fallbackService = {
+          service_id: serviceId,
+          service_name: 'Dental Treatment',
+          patient_name: 'Jane Doe',
+          patient_id: 'PT12345',
+          description: 'Dental treatment plan',
+          total_price: 750,
+          formatted_total_price: '$750.00',
+          payment_status: 'partially_paid'
+        };
+        
+        const fallbackAppointments = [
+          {
+            id: 1,
+            dateLabel: '12 Aug 2023',
+            time: '10:00',
+            title: 'Initial consultation',
+            notes: 'Initial examination and treatment planning',
+            status: 'checked-in',
+            prescription: null,
+            invoice: null,
+            files: []
+          }
+        ];
+        
+        setService(fallbackService);
+        setAppointments(fallbackAppointments);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServiceDetails();
+  }, [serviceId]);
+
+  // Handler functions
   const openAddModal = () => {
     setNewAppointment({
-      dateLabel: '',
-      time: '',
-      title: '',
-      notes: '',
+      appointment_date: '',
+      appointment_time: '',
+      description: '',
+      status: 'pending'
     });
     setIsAddModalOpen(true);
   };
@@ -82,45 +235,69 @@ const ServiceDetails = () => {
     }));
   };
 
-  const handleCreateAppointment = () => {
-    if (!newAppointment.dateLabel || !newAppointment.time || !newAppointment.title) {
-      alert('Please fill date, time and title.');
+  const handleCreateAppointment = async () => {
+    if (!newAppointment.appointment_date || !newAppointment.description) {
+      alert('Please fill date and description.');
       return;
     }
 
-    const nextId =
-      appointments.length > 0
-        ? Math.max(...appointments.map((a) => a.id)) + 1
-        : 1;
+    try {
+      const response = await axios.post(`${API_URL}/appointments`, {
+        service_id: serviceId,
+        appointment_date: newAppointment.appointment_date,
+        appointment_time: newAppointment.appointment_time || '10:00',
+        description: newAppointment.description,
+        status: newAppointment.status
+      });
 
-    const created = {
-      id: nextId,
-      dateLabel: newAppointment.dateLabel,
-      time: newAppointment.time,
-      title: newAppointment.title,
-      notes: newAppointment.notes,
-      prescription: null,
-      invoice: null,
-      files: [],
-    };
+      console.log('Appointment created:', response.data);
+      
+      const createdAppointment = response.data.appointment || response.data;
+      
+      // Format the new appointment for frontend
+      const formattedDate = new Date(createdAppointment.appointment_date).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
 
-    setAppointments((prev) => [created, ...prev]);
-    setIsAddModalOpen(false);
+      const formattedAppointment = {
+        id: createdAppointment.appointment_id || createdAppointment.id,
+        dateLabel: formattedDate,
+        time: createdAppointment.appointment_time || '10:00',
+        title: createdAppointment.description,
+        notes: createdAppointment.description,
+        status: createdAppointment.status || 'pending',
+        prescription: null,
+        invoice: null,
+        files: [],
+      };
+
+      setAppointments(prev => [formattedAppointment, ...prev]);
+      setIsAddModalOpen(false);
+      
+      alert('Appointment created successfully!');
+    } catch (err) {
+      console.error('Error creating appointment:', err.response?.data || err.message);
+      alert(`Failed to create appointment: ${err.response?.data?.error || err.message}`);
+    }
   };
 
-  // Prescription navigation (unchanged)
-  const handleAddPrescription = () => {
-    window.location.href = `/prescription_management`;
+  // Prescription navigation
+  const handleAddPrescription = (appointmentId) => {
+    navigate(`/prescription_management?appointment_id=${appointmentId}`);
   };
 
-  // BILL POPUP LOGIC (local, no navigation)
+  const handleOpenPrescription = (appointmentId) => {
+    navigate(`/prescriptions/${appointmentId}`);
+  };
+
+  // BILL POPUP LOGIC
   const openBillModal = (appointmentId, existingInvoice) => {
     setBillModal({
       isOpen: true,
       appointmentId,
-      amount: existingInvoice?.amount
-        ? existingInvoice.amount.replace(/[^0-9.]/g, '')
-        : '',
+      amount: existingInvoice?.amount ? existingInvoice.amount.replace(/[^0-9.]/g, '') : '',
       description: existingInvoice?.description || '',
     });
   };
@@ -142,29 +319,82 @@ const ServiceDetails = () => {
     }));
   };
 
-  const handleSaveBill = () => {
-    if (!billModal.amount) {
+  const handleSaveBill = async () => {
+    if (!billModal.amount || !billModal.appointmentId) {
       alert('Please enter an amount.');
       return;
     }
 
-    const formattedAmount = `$${parseFloat(billModal.amount).toFixed(2)}`;
+    try {
+      // First, check if payment exists for this service
+      let paymentId;
+      try {
+        const paymentResponse = await axios.get(`${API_URL}/payments/service/${serviceId}`);
+        console.log('Payment response:', paymentResponse.data);
+        if (paymentResponse.data && paymentResponse.data.payment) {
+          paymentId = paymentResponse.data.payment.payment_id;
+        }
+      } catch (paymentErr) {
+        console.log('No payment found, will create one:', paymentErr.message);
+      }
 
-    setAppointments((prev) =>
-      prev.map((apt) =>
-        apt.id === billModal.appointmentId
-          ? {
-              ...apt,
-              invoice: {
-                amount: formattedAmount,
-                description: billModal.description.trim(),
-              },
-            }
-          : apt
-      )
-    );
+      // Create payment if it doesn't exist
+      if (!paymentId) {
+        console.log('Creating new payment...');
+        // Get current service total or use bill amount
+        let serviceTotal = parseFloat(billModal.amount);
+        try {
+          const serviceResponse = await axios.get(`${API_URL}/services/${serviceId}`);
+          const serviceData = serviceResponse.data.service || serviceResponse.data;
+          serviceTotal = parseFloat(serviceData.total_amount || serviceData.total_cost || billModal.amount);
+        } catch (serviceErr) {
+          console.log('Could not fetch service, using bill amount');
+        }
+        
+        const createPaymentResponse = await axios.post(`${API_URL}/payments`, {
+          service_id: serviceId,
+          total_amount: serviceTotal,
+          description: billModal.description || 'Appointment invoice'
+        });
+        console.log('Payment created:', createPaymentResponse.data);
+        paymentId = createPaymentResponse.data.payment.payment_id;
+      }
 
-    closeBillModal();
+      // Create invoice
+      console.log('Creating invoice with payment ID:', paymentId);
+      const invoiceResponse = await axios.post(`${API_URL}/invoices`, {
+        payment_id: paymentId,
+        appointment_id: billModal.appointmentId,
+        amount: parseFloat(billModal.amount),
+        description: billModal.description || ''
+      });
+
+      console.log('Invoice created:', invoiceResponse.data);
+
+      const formattedAmount = `$${parseFloat(billModal.amount).toFixed(2)}`;
+
+      // Update appointments state
+      setAppointments(prev =>
+        prev.map((apt) =>
+          apt.id === billModal.appointmentId
+            ? {
+                ...apt,
+                invoice: {
+                  amount: formattedAmount,
+                  description: billModal.description.trim(),
+                  invoice_id: invoiceResponse.data.invoice.invoice_id
+                },
+              }
+            : apt
+        )
+      );
+
+      closeBillModal();
+      alert('Invoice created successfully!');
+    } catch (err) {
+      console.error('Error saving bill:', err.response?.data || err.message);
+      alert(`Failed to save invoice: ${err.response?.data?.error || err.message}`);
+    }
   };
 
   // Files
@@ -174,35 +404,164 @@ const ServiceDetails = () => {
     fileInputRef.current.click();
   };
 
-  const handleFilesSelected = (event) => {
-    const files = Array.from(event.target.files || []);
-    const aptId = parseInt(event.target.dataset.appointmentId, 10);
-    if (!aptId || files.length === 0) return;
+  // const handleFilesSelected = async (event) => {
+  //   const files = Array.from(event.target.files || []);
+  //   const appointmentId = parseInt(event.target.dataset.appointmentId, 10);
+    
+  //   if (!appointmentId || files.length === 0) return;
 
-    setAppointments((prev) =>
-      prev.map((apt) =>
-        apt.id === aptId
+  //   try {
+  //     const formData = new FormData();
+  //     files.forEach(file => {
+  //       formData.append('documents', file);
+  //     });
+  //     formData.append('appointment_id', appointmentId);
+
+  //     const response = await axios.post(`${API_URL}/documents/upload`, formData, {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data'
+  //       }
+  //     });
+
+  //     console.log('Files uploaded:', response.data);
+
+  //     // Update appointments with new files
+  //     const newFiles = response.data.documents.map(doc => ({
+  //       name: doc.filename || doc.path,
+  //       document_id: doc.document_id
+  //     }));
+
+  //     setAppointments(prev =>
+  //       prev.map((apt) =>
+  //         apt.id === appointmentId
+  //           ? {
+  //               ...apt,
+  //               files: [...(apt.files || []), ...newFiles],
+  //             }
+  //           : apt
+  //       )
+  //     );
+
+  //     alert('Files uploaded successfully!');
+  //   } catch (err) {
+  //     console.error('Error uploading files:', err.response?.data || err.message);
+  //     alert(`Failed to upload files: ${err.response?.data?.error || err.message}`);
+  //   }
+
+  //   event.target.value = '';
+  // };
+
+  const handleFilesSelected = async (event) => {
+  const files = Array.from(event.target.files || []);
+  const appointmentId = parseInt(event.target.dataset.appointmentId, 10);
+  
+  if (!appointmentId || files.length === 0) return;
+
+  try {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('documents', file); // Make sure this matches the Multer field name
+    });
+    formData.append('appointment_id', appointmentId);
+
+    console.log('Uploading files:', files.map(f => f.name));
+    console.log('To appointment:', appointmentId);
+    console.log('Endpoint:', `${API_URL}/documents/upload`);
+
+    const response = await axios.post(`${API_URL}/documents/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    console.log('Files uploaded:', response.data);
+
+    // Update appointments with new files
+    const newFiles = response.data.documents.map(doc => ({
+      name: doc.filename || doc.path,
+      document_id: doc.document_id
+    }));
+
+    setAppointments(prev =>
+      prev.map(apt =>
+        apt.id === appointmentId
           ? {
               ...apt,
-              files: [
-                ...apt.files,
-                ...files.map((f) => ({ name: f.name })),
-              ],
+              files: [...(apt.files || []), ...newFiles],
             }
           : apt
       )
     );
 
-    event.target.value = '';
+    alert('Files uploaded successfully!');
+  } catch (err) {
+    console.error('Error uploading files:', err);
+    console.error('Error response:', err.response?.data);
+    console.error('Error status:', err.response?.status);
+    console.error('Error headers:', err.response?.headers);
+    
+    if (err.response?.status === 404) {
+      alert(`Endpoint not found. Please check if the backend is running and the endpoint ${API_URL}/documents/upload exists.`);
+    } else {
+      alert(`Failed to upload files: ${err.response?.data?.error || err.message}`);
+    }
+  }
+
+  event.target.value = '';
+};
+
+  const handleOpenFile = (documentId, fileName) => {
+    window.open(`${API_URL}/documents/download/${documentId}`, '_blank');
   };
 
-  const handleOpenPrescription = (appointmentId) => {
-    console.log('Open prescription for appointment', appointmentId);
+  const handleDeleteFile = async (documentId, appointmentId) => {
+    if (window.confirm('Are you sure you want to delete this file?')) {
+      try {
+        await axios.delete(`${API_URL}/documents/${documentId}`);
+        
+        setAppointments(prev =>
+          prev.map((apt) =>
+            apt.id === appointmentId
+              ? {
+                  ...apt,
+                  files: apt.files.filter(file => file.document_id !== documentId),
+                }
+              : apt
+          )
+        );
+        
+        alert('File deleted successfully!');
+      } catch (err) {
+        console.error('Error deleting file:', err);
+        alert('Failed to delete file. Please try again.');
+      }
+    }
   };
 
-  const handleOpenFile = (appointmentId, fileName) => {
-    console.log('Open file', fileName, 'for appointment', appointmentId);
-  };
+  // Add debug logging for rendering
+  console.log('Rendering with state:', { loading, error, service, appointments, serviceId });
+
+  if (loading) {
+    return (
+      <div className="service-page-container">
+        <div className="loading-indicator">
+          <div className="spinner"></div>
+          <p>Loading service details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !service) {
+    return (
+      <div className="service-page-container">
+        <div className="error-message">
+          <p>Error: {error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="service-page-container">
@@ -210,11 +569,11 @@ const ServiceDetails = () => {
         {/* Header */}
         <header className="service-header">
           <div>
-            <h1 className="service-title">{service.name}</h1>
+            <h1 className="service-title">{service?.service_name || 'Service Details'}</h1>
             <p className="service-subtitle">
-              Patient: {service.patientName}{' '}
+              Patient: {service?.patient_name || 'Unknown'}{' '}
               <span className="service-subtitle-id">
-                (ID: {service.patientId})
+                (ID: {service?.patient_id || 'N/A'})
               </span>
             </p>
           </div>
@@ -230,138 +589,151 @@ const ServiceDetails = () => {
         <section className="service-description-card">
           <div className="service-desc-header-row">
             <h2 className="section-heading">Service overview</h2>
-            {service.totalPrice && (
+            {service?.formatted_total_price && (
               <div className="service-price-pill">
                 <span className="service-price-label">Total price</span>
                 <span className="service-price-value">
-                  {service.totalPrice}
+                  {service.formatted_total_price}
                 </span>
               </div>
             )}
           </div>
-          <p className="service-description-text">{service.description}</p>
+          <p className="service-description-text">{service?.description || 'No description available'}</p>
         </section>
 
         {/* Appointments */}
         <section className="appointments-section">
-          <h2 className="section-heading">Appointments</h2>
+          <h2 className="section-heading">Appointments ({appointments.length})</h2>
 
-          {appointments.map((apt) => (
-            <article key={apt.id} className="appointment-card">
-              {/* Top row */}
-              <div className="appointment-top-row">
-                <div>
-                  <p className="appointment-date-main">
-                    Appointment: {apt.dateLabel} • {apt.time}
-                  </p>
-                  <p className="appointment-title">{apt.title}</p>
-                </div>
-                <span className="appointment-chip">
-                  #{apt.id.toString().padStart(3, '0')}
-                </span>
-              </div>
-
-              {apt.notes && (
-                <p className="appointment-notes">{apt.notes}</p>
-              )}
-
-              <div className="appointment-columns">
-                {/* Prescription */}
-                <div className="appointment-panel prescription-panel">
-                  <div className="panel-header">
-                    <span className="panel-title">Prescription</span>
+          {appointments.length === 0 ? (
+            <div className="no-appointments">
+              <p>No appointments found. Add your first appointment!</p>
+            </div>
+          ) : (
+            appointments.map((apt) => (
+              <article key={apt.id} className="appointment-card">
+                {/* Top row */}
+                <div className="appointment-top-row">
+                  <div>
+                    <p className="appointment-date-main">
+                      Appointment: {apt.dateLabel} • {apt.time}
+                    </p>
+                    <p className="appointment-title">{apt.title}</p>
                   </div>
-
-                  {apt.prescription ? (
-                    <button
-                      className="prescription-card"
-                      onClick={() => handleOpenPrescription(apt.id)}
-                    >
-                      <span className="prescription-name">
-                        {apt.prescription.name}
-                      </span>
-                      <span className="prescription-meta">
-                        Prescribed on {apt.prescription.date}
-                      </span>
-                    </button>
-                  ) : (
-                    <button
-                      className="panel-empty-btn"
-                      onClick={handleAddPrescription}
-                    >
-                      + Add prescription
-                    </button>
-                  )}
+                  <span className="appointment-chip">
+                    #{apt.id.toString().padStart(3, '0')}
+                  </span>
                 </div>
 
-                {/* Files */}
-                <div className="appointment-panel files-panel">
-                  <div className="panel-header">
-                    <span className="panel-title">Files</span>
-                  </div>
+                {apt.notes && apt.notes !== apt.title && (
+                  <p className="appointment-notes">{apt.notes}</p>
+                )}
 
-                  {apt.files && apt.files.length > 0 && (
-                    <div className="files-list">
-                      {apt.files.map((file, index) => (
-                        <button
-                          key={index}
-                          className="file-pill-large"
-                          onClick={() =>
-                            handleOpenFile(apt.id, file.name)
-                          }
-                        >
-                          <span className="file-pill-name">{file.name}</span>
-                          <span className="file-pill-meta">View</span>
-                        </button>
-                      ))}
+                <div className="appointment-columns">
+                  {/* Prescription */}
+                  <div className="appointment-panel prescription-panel">
+                    <div className="panel-header">
+                      <span className="panel-title">Prescription</span>
                     </div>
-                  )}
 
-                  <button
-                    className="panel-empty-btn panel-empty-inline"
-                    onClick={() => triggerFilePicker(apt.id)}
-                  >
-                    + Add file
-                  </button>
-                </div>
-
-                {/* Bill */}
-                <div className="appointment-panel invoice-panel">
-                  <div className="panel-header">
-                    <span className="panel-title">Bill</span>
+                    {apt.prescription ? (
+                      <button
+                        className="prescription-card"
+                        onClick={() => handleOpenPrescription(apt.id)}
+                      >
+                        <span className="prescription-name">
+                          {apt.prescription.name}
+                        </span>
+                        <span className="prescription-meta">
+                          Prescribed on {apt.prescription.date}
+                        </span>
+                      </button>
+                    ) : (
+                      <button
+                        className="panel-empty-btn"
+                        onClick={() => handleAddPrescription(apt.id)}
+                      >
+                        + Add prescription
+                      </button>
+                    )}
                   </div>
 
-                  {apt.invoice ? (
-                    <div className="bill-display-column">
-                      <span className="bill-amount">
-                        {apt.invoice.amount}
-                      </span>
-                      {apt.invoice.description && (
-                        <span className="bill-description">
-                          {apt.invoice.description}
+                  {/* Files */}
+                  <div className="appointment-panel files-panel">
+                    <div className="panel-header">
+                      <span className="panel-title">Files</span>
+                      <span className="file-count">({apt.files?.length || 0})</span>
+                    </div>
+
+                    {apt.files && apt.files.length > 0 && (
+                      <div className="files-list">
+                        {apt.files.map((file) => (
+                          <div key={file.document_id} className="file-item">
+                            <button
+                              className="file-pill-large"
+                              onClick={() => handleOpenFile(file.document_id, file.name)}
+                            >
+                              <span className="file-pill-name">{file.name}</span>
+                              <span className="file-pill-meta">View</span>
+                            </button>
+                            <button
+                              className="file-delete-btn"
+                              onClick={() => handleDeleteFile(file.document_id, apt.id)}
+                              title="Delete file"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <button
+                      className="panel-empty-btn panel-empty-inline"
+                      onClick={() => triggerFilePicker(apt.id)}
+                    >
+                      + Add file
+                    </button>
+                  </div>
+
+                  {/* Bill */}
+                  <div className="appointment-panel invoice-panel">
+                    <div className="panel-header">
+                      <span className="panel-title">Bill</span>
+                    </div>
+
+                    {apt.invoice ? (
+                      <div className="bill-display-column">
+                        <span className="bill-amount">
+                          {apt.invoice.amount}
                         </span>
-                      )}
+                        {apt.invoice.description && (
+                          <span className="bill-description">
+                            {apt.invoice.description}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className="panel-empty-btn bill-edit-btn"
+                          onClick={() => openBillModal(apt.id, apt.invoice)}
+                        >
+                          Edit bill
+                        </button>
+                      </div>
+                    ) : (
                       <button
                         type="button"
-                        className="panel-empty-btn bill-edit-btn"
-                        onClick={() => openBillModal(apt.id, apt.invoice)}
+                        className="panel-empty-btn"
+                        onClick={() => openBillModal(apt.id, null)}
                       >
-                        Edit bill
+                        + Add bill
                       </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="panel-empty-btn"
-                      onClick={() => openBillModal(apt.id, null)}
-                    >
-                      + Add bill
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          )}
         </section>
       </div>
 
@@ -394,8 +766,8 @@ const ServiceDetails = () => {
                   <label className="service-modal-label">Date</label>
                   <input
                     type="date"
-                    name="dateLabel"
-                    value={newAppointment.dateLabel}
+                    name="appointment_date"
+                    value={newAppointment.appointment_date}
                     onChange={handleNewAppointmentChange}
                     className="service-modal-input"
                   />
@@ -405,19 +777,19 @@ const ServiceDetails = () => {
                   <label className="service-modal-label">Time</label>
                   <input
                     type="time"
-                    name="time"
-                    value={newAppointment.time}
+                    name="appointment_time"
+                    value={newAppointment.appointment_time}
                     onChange={handleNewAppointmentChange}
                     className="service-modal-input"
                   />
                 </div>
 
                 <div className="service-modal-group service-modal-group-full">
-                  <label className="service-modal-label">Title</label>
+                  <label className="service-modal-label">Description</label>
                   <input
                     type="text"
-                    name="title"
-                    value={newAppointment.title}
+                    name="description"
+                    value={newAppointment.description}
                     onChange={handleNewAppointmentChange}
                     className="service-modal-input"
                     placeholder="e.g., Follow-up consultation"
@@ -425,17 +797,17 @@ const ServiceDetails = () => {
                 </div>
 
                 <div className="service-modal-group service-modal-group-full">
-                  <label className="service-modal-label">
-                    Description / notes
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={newAppointment.notes}
+                  <label className="service-modal-label">Status</label>
+                  <select
+                    name="status"
+                    value={newAppointment.status}
                     onChange={handleNewAppointmentChange}
-                    rows="3"
-                    className="service-modal-textarea"
-                    placeholder="Add any details about this appointment..."
-                  />
+                    className="service-modal-input"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="checked-in">Checked-in</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
                 </div>
               </div>
             </div>
