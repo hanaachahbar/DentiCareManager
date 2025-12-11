@@ -6,8 +6,65 @@
 const db = require("../config/db");
 
 exports.getPatients = (req, res) => {
-  db.all("SELECT * FROM Patient ORDER BY created_at DESC", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+  const { page = 1, limit = 10, search = '' } = req.query;
+  const offset = (page - 1) * limit;
+
+  // Build search query
+  let searchQuery = '';
+  let searchParams = [];
+  
+  if (search) {
+    searchQuery = `
+      WHERE first_name LIKE ? 
+      OR last_name LIKE ? 
+      OR email LIKE ? 
+      OR phone_number LIKE ?
+    `;
+    const searchTerm = `%${search}%`;
+    searchParams = [searchTerm, searchTerm, searchTerm, searchTerm];
+  }
+
+  // Get total count for pagination
+  const countQuery = `SELECT COUNT(*) as total FROM Patient ${searchQuery}`;
+  
+  db.get(countQuery, searchParams, (err, countResult) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    // Get paginated patients
+    const query = `
+      SELECT 
+        patient_id,
+        first_name,
+        last_name,
+        date_of_birth as dob,
+        phone_number as contact,
+        allergies,
+        chronic_conditions as chronique,
+        hereditary_conditions as hereditaire,
+        email,
+        created_at,
+        CASE 
+          WHEN date_of_birth IS NOT NULL 
+          THEN strftime('%d-%m-%Y', date_of_birth)
+          ELSE 'N/A'
+        END as formatted_dob,
+        CASE 
+          WHEN created_at IS NOT NULL 
+          THEN strftime('%d-%m-%Y', created_at)
+          ELSE 'N/A'
+        END as lastVisit
+      FROM Patient 
+      ${searchQuery}
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    db.all(query, [...searchParams, limit, offset], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
 
     const formattedRows = rows.map(patient => ({
       ...patient,

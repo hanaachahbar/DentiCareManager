@@ -77,7 +77,10 @@ const PaymentTracking = () => {
             }
             
             patientsMap = patientsList.reduce((acc, patient) => {
-              acc[patient.patient_id] = patient;
+              const patientId = patient.patient_id || patient.id;
+              if (patientId) {
+                acc[patientId] = patient;
+              }
               return acc;
             }, {});
             

@@ -84,6 +84,52 @@ exports.getDocumentsByAppointment = (req, res) => {
   );
 };
 
+// Get all documents for a patient
+exports.getDocumentsByPatient = (req, res) => {
+  const { patient_id } = req.params;
+
+  const query = `
+    SELECT 
+      d.*,
+      a.appointment_id,
+      a.appointment_date,
+      s.service_name,
+      p.first_name,
+      p.last_name
+    FROM Documents d
+    JOIN Appointment a ON d.appointment_id = a.appointment_id
+    JOIN Services s ON a.service_id = s.service_id
+    JOIN Patient p ON s.patient_id = p.patient_id
+    WHERE p.patient_id = ?
+    ORDER BY d.saved_at DESC
+  `;
+
+  db.all(query, [patient_id], (err, documents) => {
+    if (err) {
+      console.error("Database error fetching documents for patient:", err);
+      // Return empty documents array if there's an error (no documents or table issue)
+      return res.json({ 
+        count: 0,
+        documents: [] 
+      });
+    }
+
+    // Handle case where documents is null or undefined
+    const documentsList = documents || [];
+
+    // Add full URL to documents
+    const documentsWithUrl = documentsList.map(doc => ({
+      ...doc,
+      url: `${req.protocol}://${req.get('host')}/uploads/${doc.path}`
+    }));
+
+    res.json({ 
+      count: documentsWithUrl.length,
+      documents: documentsWithUrl 
+    });
+  });
+};
+
 // Download document
 exports.downloadDocument = (req, res) => {
   const { document_id } = req.params;

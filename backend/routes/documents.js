@@ -34,6 +34,9 @@ router.post("/upload", upload.array("documents", 10), documentsController.upload
 // Get documents for an appointment
 router.get("/appointment/:appointment_id", documentsController.getDocumentsByAppointment);
 
+// Get documents for a patient
+router.get("/patient/:patient_id", documentsController.getDocumentsByPatient);
+
 // Download document
 router.get("/download/:document_id", documentsController.downloadDocument);
 
