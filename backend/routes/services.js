@@ -9,6 +9,9 @@ router.post("/", servicesController.createService);
 // Get all services
 router.get("/", servicesController.getAllServices);
 
+// Get total completed services
+router.get("/completeServices", servicesController.getTotalCompletedServices);
+
 // Get service by ID
 router.get("/:id", servicesController.getServiceById);
 
