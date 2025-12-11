@@ -330,7 +330,7 @@ const ServiceDetails = () => {
         if (invoiceAmount > remainingToInvoice) {
           const excessAmount = invoiceAmount - remainingToInvoice;
           alert(
-            `Your requested amountexceeds the remaining balance.\n\n` +
+            `Your requested amountexceeds the remaining balance\n\n` +
             ` Maximum amount: $${remainingToInvoice.toFixed(2)}`
           );
           return;
