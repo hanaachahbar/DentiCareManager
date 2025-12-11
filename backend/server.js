@@ -14,9 +14,9 @@ const paymentsRoute = require("./routes/payments");
 const invoicesRoute = require("./routes/invoices");
 const servicesRoute = require("./routes/services");
 const appointmentsRoute = require("./routes/appointments");
+const documentsRoute = require("./routes/documents");
 
 /*
-const documentsRoute = require("./routes/documents");
 const prescriptionsRoute = require("./routes/prescriptions");
 const medicationsRoute = require("./routes/medications");
 */
@@ -27,9 +27,9 @@ app.use("/api/payments", paymentsRoute);
 app.use("/api/invoices", invoicesRoute);
 app.use("/api/services", servicesRoute);
 app.use("/api/appointments", appointmentsRoute);
+app.use("/api/documents", documentsRoute);
 
 /*
-app.use("/api/documents", documentsRoute);
 app.use("/api/prescriptions", prescriptionsRoute);
 app.use("/api/medications", medicationsRoute);
 */
@@ -48,6 +48,10 @@ app.use("/api/medications", medicationsRoute);
 app.use("/api/labs", labsRoute);
 app.use("/api/lab_works", labWorksRoute);
 app.use("/api/labService", labServicesRoute);
+
+// Serve static files for document downloads
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Root endpoint
 app.get("/", (req, res) => {
