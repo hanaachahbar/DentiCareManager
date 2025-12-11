@@ -48,7 +48,7 @@ exports.getPatients = (req, res) => {
     // Get paginated patients
     const query = `
       SELECT 
-        patient_id as id,
+        patient_id,
         first_name,
         last_name,
         date_of_birth as dob,

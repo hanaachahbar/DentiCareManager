@@ -27,12 +27,23 @@ export default function Dashboard() {
     try {
       const response = await axios.get('http://localhost:5000/api/patients');
       console.log(response.data);
-      const max_length = (response.data.length < 5) ? response.data.length: 5;
+      
+      // Handle different response formats
+      let patientsList = [];
+      if (Array.isArray(response.data)) {
+        patientsList = response.data;
+      } else if (response.data.patients && Array.isArray(response.data.patients)) {
+        patientsList = response.data.patients;
+      } else if (response.data.value && Array.isArray(response.data.value)) {
+        patientsList = response.data.value;
+      }
+      
+      const max_length = (patientsList.length < 5) ? patientsList.length: 5;
       var patient_list = [];
       for(var i=0; i<max_length; i++) {
-        const patient = response.data[i];
+        const patient = patientsList[i];
         patient_list.push(
-          {id: patient['patient_id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: patient.created_at.split(" ")[0]}
+          {id: patient['patient_id'] || patient['id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: patient.created_at.split(" ")[0]}
         );
       }
       setNewPatients(patient_list);

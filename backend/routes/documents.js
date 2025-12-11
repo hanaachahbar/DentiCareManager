@@ -34,25 +34,13 @@ router.post("/upload", upload.array("documents", 10), documentsController.upload
 // Get documents for an appointment
 router.get("/appointment/:appointment_id", documentsController.getDocumentsByAppointment);
 
+// Get documents for a patient
+router.get("/patient/:patient_id", documentsController.getDocumentsByPatient);
+
 // Download document
 router.get("/download/:document_id", documentsController.downloadDocument);
 
 // Delete document
 router.delete("/:document_id", documentsController.deleteDocument);
-
-// Upload document for an appointment
-router.post('/', upload.single('file'), documentsController.uploadDocument);
-
-// Get all documents for a patient
-router.get('/patient/:patient_id', documentsController.getDocumentsByPatient);
-
-// Get documents for a specific appointment
-router.get('/appointment/:appointment_id', documentsController.getDocumentsByAppointment);
-
-// Download a document
-router.get('/download/:document_id', documentsController.downloadDocument);
-
-// Delete a document
-router.delete('/:document_id', documentsController.deleteDocument);
 
 module.exports = router;

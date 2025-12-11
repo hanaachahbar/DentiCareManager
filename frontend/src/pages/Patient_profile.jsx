@@ -39,10 +39,7 @@ const PatientProfile = () => {
     payment_description: '',
   });
 
-  const [documents] = useState([
-    { name: 'dental-xray-1.png', date: '12-05-2023' },
-    { name: 'consent-form.pdf', date: '10-05-2023' },
-  ]);
+  const [documents, setDocuments] = useState([]);
 
   // Fetch patient data on component mount
   useEffect(() => {
@@ -102,6 +99,22 @@ const PatientProfile = () => {
 
         setServices(servicesWithAppointments);
         setError(null);
+
+        // Fetch documents for this patient
+        try {
+          const documentsResponse = await fetch(
+            `http://localhost:5000/api/documents/patient/${patientId}`
+          );
+          if (documentsResponse.ok) {
+            const documentsData = await documentsResponse.json();
+            let documentsList = Array.isArray(documentsData)
+              ? documentsData
+              : documentsData.documents || [];
+            setDocuments(documentsList);
+          }
+        } catch (err) {
+          console.error('Error fetching documents:', err);
+        }
       } catch (err) {
         console.error('Error fetching patient data:', err);
         setError('Failed to load patient information');
@@ -446,12 +459,26 @@ const PatientProfile = () => {
                   documents.map((doc, idx) => (
                     <div key={idx} className="document-item">
                       <div>
-                        <p className="document-name">{doc.name}</p>
-                        <p className="document-date">{doc.date}</p>
+                        <p className="document-name">{doc.path || doc.filename || 'Unknown'}</p>
+                        <p className="document-date">
+                          {doc.appointment_date 
+                            ? new Date(doc.appointment_date).toLocaleDateString()
+                            : doc.saved_at 
+                            ? new Date(doc.saved_at).toLocaleDateString()
+                            : 'N/A'}
+                        </p>
+                        <p className="document-service" style={{ fontSize: '0.85rem', color: '#95a5a6' }}>
+                          {doc.service_name || 'Service'}
+                        </p>
                       </div>
-                      <button className="btn-icon">
+                      <a 
+                        href={`http://localhost:5000/api/documents/download/${doc.document_id}`}
+                        download
+                        className="btn-icon"
+                        title="Download document"
+                      >
                         <Download className="icon-small" />
-                      </button>
+                      </a>
                     </div>
                   ))
                 )}
