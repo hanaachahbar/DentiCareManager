@@ -8,6 +8,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
+  const [totalAppointments, setTotalAppointments] = useState(0);
 
   function getInitials(name) {
     var initial = '';
@@ -47,6 +48,7 @@ export default function Dashboard() {
       if(response.data.count == 0) return;
 
       const A = response.data.appointments;
+      setTotalAppointments(response.data.count);
       setAppointments(A.slice(0, 6).map(ap => ({
         id: ap.appointment_id,
         name: ap.first_name + ' ' + ap.last_name,
@@ -112,7 +114,7 @@ export default function Dashboard() {
           
           <div className="dashboard-stat-item">
             <div className="stat-label">Total Appointments</div>
-            <div className="stat-value">12</div>
+            <div className="stat-value">{totalAppointments}</div>
           </div>
 
           <div className="dashboard-stat-item">
