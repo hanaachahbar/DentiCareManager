@@ -6,38 +6,47 @@ function AddNewMedicament({ onAdd, onClose }) {
   const [name, setName] = useState("");
   const [common_uses, setCommonUses] = useState("");
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
     const e = {};
     if (!name.trim()) e.name = "Name is required.";
-    if (!common_uses.trim()) e.common_uses = "Please add at least one common uses";
+    if (!common_uses.trim()) e.common_uses = "Please add at least one common use";
     return e;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
+
+    setIsSubmitting(true);
 
     const newMed = {
       name: name.trim(),
       common_uses: common_uses.trim(),
     };
 
-    onAdd(newMed);
-
-    // reset & close
-    setName("");
-    setCommonUses("");
-    setErrors({});
-    onClose();
+    try {
+      await onAdd(newMed);
+      
+      // Reset form on success
+      setName("");
+      setCommonUses("");
+      setErrors({});
+    } catch (error) {
+      console.error('Error in form submission:', error);
+      setErrors({ submit: 'Failed to add medication. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="add-new-medicament">
       <div className="Form-container">
-        <button className="close-btn" onClick={() => onClose()}>
+        <button className="close-btn" onClick={() => onClose()} disabled={isSubmitting}>
           <span className="material-symbols-outlined">close</span>
         </button>
 
@@ -51,6 +60,7 @@ function AddNewMedicament({ onAdd, onClose }) {
               className="form-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
 
@@ -62,10 +72,18 @@ function AddNewMedicament({ onAdd, onClose }) {
               className="form-input"
               value={common_uses}
               onChange={(e) => setCommonUses(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
-          <button className="submit-btn" type="submit">
-            Add Medication
+
+          {errors.submit && <p className="error submit-error">{errors.submit}</p>}
+
+          <button 
+            className="submit-btn" 
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Adding...' : 'Add Medication'}
           </button>
         </form>
       </div>

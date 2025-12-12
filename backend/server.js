@@ -22,6 +22,7 @@ const documentsRoute = require("./routes/documents");
 const labsRoute = require("./routes/labs");
 const labWorksRoute = require("./routes/labWorks");
 const labServicesRoute = require("./routes/labService");
+const medicationsRoute = require("./routes/medications")
 
 // Route mappings
 app.use("/api/patients", patientsRoute);
@@ -34,6 +35,7 @@ app.use("/api/documents", documentsRoute);
 app.use("/api/labs", labsRoute);
 app.use("/api/lab_works", labWorksRoute);
 app.use("/api/labService", labServicesRoute);
+app.use("/api/medications", medicationsRoute);
 
 // Root endpoint
 app.get("/", (req, res) => {
