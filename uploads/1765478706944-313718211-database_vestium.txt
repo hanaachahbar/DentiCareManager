@@ -1,0 +1,58 @@
+User:
+	- user_id (PK)
+	- username
+	- full_name
+	- bio
+	- pfp
+	- email
+	- password
+	- date_created
+	- camera_permission
+	- gallery_permission
+followings_followers:
+	- following_id (PK)
+	- follower_id (PK)
+	- date
+comments:
+	- comment_id (PK)
+	- post_id (FK)
+	- user_id (FK)
+	- content
+	- date
+likes:
+	- like_id (PK)
+	- post_id (FK)
+	- user_id (FK)
+	- date
+items:
+	- item_id (PK)
+	- user_id (FK)
+	- image_path
+	- category_id (FK)
+	- item_name
+	- description
+	- season
+	- date
+items_categories:
+	- category_id (PK) 
+	- category_name
+outfit_categories:
+	- category_id (PK) 
+	- category_name
+outfits:
+	- outfit_id (PK)
+	- user_id (FK)
+	- outfit_name
+	- description
+	- category_id (FK)
+	- date
+	- season
+outfit_item:
+	- outfit_id (PK)
+	- item_id (PK)
+posts:
+	- post_id (PK)
+	- outfit_id (FK)
+	- image_path (optional)
+	- date
+

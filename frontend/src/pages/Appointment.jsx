@@ -16,117 +16,86 @@ const AppointmentsMainPage = () => {
     new Date(today.getFullYear(), today.getMonth(), 1)
   );
   const [viewMode, setViewMode] = useState('daily');
-
-  // Sample data moved to 2025 (same months/days, just year = 2025)
-  const [appointments, setAppointments] = useState([
-    {
-      id: '12345',
-      patient: 'John Doe',
-      date: new Date(2025, 0, 5),
-      time: '09:00 AM',
-      status: 'Confirmed',
-      reason: 'Routine Check-up',
-      description: 'Annual physical examination',
-    },
-    {
-      id: '12346',
-      patient: 'Jane Smith',
-      date: new Date(2025, 0, 5),
-      time: '10:30 AM',
-      status: 'Pending',
-      reason: 'Filling',
-      description: 'Dental filling procedure',
-    },
-    {
-      id: '12347',
-      patient: 'Michael Johnson',
-      date: new Date(2025, 0, 5),
-      time: '02:00 PM',
-      status: 'Confirmed',
-      reason: 'Cleaning',
-      description: 'Routine dental cleaning',
-    },
-    {
-      id: '12348',
-      patient: 'Emily Williams',
-      date: new Date(2025, 0, 4),
-      time: '11:00 AM',
-      status: 'Cancelled',
-      reason: 'Consultation',
-      description: 'Initial consultation',
-    },
-    {
-      id: '12349',
-      patient: 'David Brown',
-      date: new Date(2025, 0, 6),
-      time: '09:30 AM',
-      status: 'Confirmed',
-      reason: 'X-Ray',
-      description: 'Dental X-ray',
-    },
-    {
-      id: '12350',
-      patient: 'Sarah Wilson',
-      date: new Date(2025, 0, 7),
-      time: '01:00 PM',
-      status: 'Pending',
-      reason: 'Blood Test',
-      description: 'Lab work',
-    },
-    {
-      id: '12351',
-      patient: 'Robert Taylor',
-      date: new Date(2025, 0, 10),
-      time: '10:00 AM',
-      status: 'Confirmed',
-      reason: 'Follow-up',
-      description: 'Post-treatment check',
-    },
-    {
-      id: '12352',
-      patient: 'Lisa Anderson',
-      date: new Date(2025, 0, 12),
-      time: '03:00 PM',
-      status: 'Pending',
-      reason: 'Consultation',
-      description: 'New patient',
-    },
-    {
-      id: '12353',
-      patient: 'James Martinez',
-      date: new Date(2025, 0, 15),
-      time: '11:30 AM',
-      status: 'Confirmed',
-      reason: 'Vaccination',
-      description: 'Flu shot',
-    },
-    {
-      id: '12354',
-      patient: 'Maria Garcia',
-      date: new Date(2025, 0, 20),
-      time: '02:30 PM',
-      status: 'Confirmed',
-      reason: 'Checkup',
-      description: 'Routine examination',
-    },
-  ]);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
 
-  // Merge new appointment coming from AddAppointmentPage
-  useEffect(() => {
-    const state = location.state;
-    if (state && state.newAppointment) {
-      const incoming = state.newAppointment;
+  // Fetch appointments from API
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/appointments');
+      if (!response.ok) throw new Error('Failed to fetch appointments');
+      
+      const data = await response.json();
+      console.log('Fetched appointments:', data); // Debug log
+      let appointmentsList = [];
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        appointmentsList = data;
+      } else if (data.appointments && Array.isArray(data.appointments)) {
+        appointmentsList = data.appointments;
+      }
 
-      setAppointments((prev) => {
-        const exists = prev.some((a) => a.id === incoming.id);
-        if (exists) return prev;
-        return [...prev, incoming];
+      console.log('Appointments list:', appointmentsList); // Debug log
+
+      // Transform backend data to frontend format
+      const transformedAppointments = appointmentsList.map((apt) => {
+        const dateObj = new Date(apt.appointment_date);
+        let timeStr = apt.appointment_time || '00:00';
+        
+        // Convert time format HH:MM to display format
+        const [hours, minutes] = timeStr.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        const displayTime = `${displayHour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+
+        // Map status from backend
+        let statusMap = {
+          'pending': 'Pending',
+          'checked-in': 'Confirmed',
+          'cancelled': 'Cancelled'
+        };
+
+        return {
+          id: apt.appointment_id,
+          patient: `${apt.first_name} ${apt.last_name}`,
+          date: dateObj,
+          time: displayTime,
+          status: statusMap[apt.status] || apt.status,
+          reason: apt.service_name || 'General Appointment',
+          description: apt.description || '',
+          appointment_id: apt.appointment_id
+        };
       });
+
+      console.log('Transformed appointments:', transformedAppointments); // Debug log
+      setAppointments(transformedAppointments);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setError('Failed to load appointments');
+    } finally {
+      setLoading(false);
     }
-  }, [location.state]);
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+    
+    // Refresh appointments when page comes into focus
+    const handleFocus = () => {
+      fetchAppointments();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -254,13 +223,26 @@ const AppointmentsMainPage = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (appointmentToDelete) {
-      setAppointments((prev) =>
-        prev.filter((apt) => apt.id !== appointmentToDelete.id)
-      );
-      setShowDeleteConfirm(false);
-      setAppointmentToDelete(null);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/appointments/${appointmentToDelete.appointment_id}`,
+          { method: 'DELETE' }
+        );
+        
+        if (!response.ok) throw new Error('Failed to delete appointment');
+        
+        setAppointments((prev) =>
+          prev.filter((apt) => apt.id !== appointmentToDelete.id)
+        );
+      } catch (err) {
+        console.error('Error deleting appointment:', err);
+        setError('Failed to delete appointment');
+      } finally {
+        setShowDeleteConfirm(false);
+        setAppointmentToDelete(null);
+      }
     }
   };
 
@@ -299,6 +281,47 @@ const AppointmentsMainPage = () => {
 
   return (
     <div className="appointments-container">
+      {loading && (
+        <div className="appointments-wrapper">
+          <div className="appointments-card">
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <p>Loading appointments...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="appointments-wrapper">
+          <div className="appointments-card">
+            <div style={{
+              textAlign: 'center',
+              padding: '40px',
+              color: '#d32f2f',
+              backgroundColor: '#ffebee',
+              borderRadius: '8px'
+            }}>
+              <p>{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  marginTop: '15px',
+                  padding: '8px 16px',
+                  backgroundColor: '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && (
       <div className="appointments-wrapper">
         <div className="appointments-card">
           <div className="appointments-header">
@@ -491,6 +514,7 @@ const AppointmentsMainPage = () => {
           </div>
         </div>
       </div>
+      )}
 
       {showDeleteConfirm && (
         <div className="modal-overlay">
