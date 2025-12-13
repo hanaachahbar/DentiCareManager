@@ -35,7 +35,7 @@ export default function Dashboard() {
       const max_length = (response.data.length < 5) ? response.data.length: 5;
       var patient_list = [];
       for(var i=0; i<max_length; i++) {
-        const patient = patientsList[i];
+        const patient = response.data[i];
         patient_list.push(
           {id: patient['patient_id'] || patient['id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: patient.created_at.split(" ")[0]}
         );
