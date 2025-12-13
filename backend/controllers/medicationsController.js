@@ -1,68 +1,75 @@
 const db = require('../config/db');
 
-exports.getMedications = (req, res) => {
-    db.all('SELECT * FROM Medication', [], (err, rows) => {
-        if(err) return res.status(500).json({error: err.message});
-        res.json(rows);
+exports.getAllMedications = (req, res) => {
+    const sql = 'SELECT * FROM Medication';
+
+    db.all(sql, [], (err, rows) => {
+        if(err) return res.status(400).json({ error: err.message });
+        
+        res.status(200).json(rows);
     });
 };
 
+exports.updateMedication = (req, res) => {
+    const {medication_id} = req.params;
+    const fields = req.body;
+    const updates = [];
+    const values = [];
 
-exports.getMedicationById = (req, res) => {
-    const {id} = req.params;
-    db.get('SELECT * FROM Medication WHERE medication_id = ?', [id], (err, row) => {
-        if(err) return res.status(500).json({error: err.message});
-        if(!row) return res.status(404).json({error: "Patient not found!"});
-        res.json(row);
-    });
-};
+    for(let key in fields) {
+        updates.push(`${key} = ?`);           
+        values.push(fields[key]);
+    }
 
+    if(updates.length === 0) return res.status(400).json({ error: "No feild to update" });
+    const sql = `UPDATE Medication SET ${updates.join(', ')} WHERE medication_id = ?`;
+    values.push(medication_id);
 
-exports.addMedication = (req, res) => {
-    const {id} = req.params;
-    const { name, common_uses } = req.body;
-    const sql = "INSERT INTO Medication (name, common_uses) values ?, ?";
-    const values = [name, common_uses];
-    db.run(sql, values, (err) => {
-        if(err) return res.status(500).json({ error: err.message });
-        res.status(201).json({
-            status: true,
-            medication_data: {
-                medication_id: this.lastID,
-                medication_name: name,
-                common_uses
+    db.run(sql, values, function (err) {
+        if(err) return res.status(400).json({ error: err.message });
+        if(this.changes === 0) return res.status(404).json({ error: "Medication not found" });
+        
+        res.status(200).json({
+            status: "medication updated",
+            MedicationDetails: {
+                medication_id: medication_id,
+                update_fields: fields
             }
         });
     });
 };
 
+exports.deleteMedication = (req, res) => {
+    const {medication_id} = req.params;
+    const sql = 'DELETE FROM Medication WHERE medication_id = ?';
 
-exports.updateMedication = (req, res) => {
-    const { id } = req.params;
-    const fields = req.body;
-    const updates = [];
-    const values = [];
-    for (let key in fields) {
-        updates.push(`${key} = ?`);
-        values.push(fields[key]);
-    }
-    if (updates.length === 0) {
-        return res.status(400).json({ error: "No fields to update" });
-    }
-
-    db.run(`UPDATE Medication SET ${updates.join(', ')} WHERE medication_id = ?`, values, (err) => {
-        if(err) return res.status(500).json({ error: err.message });
+    db.run(sql, medication_id, function (err) {
+        if(err) return res.status(400).json({ error: err.message });
         if(this.changes === 0) return res.status(404).json({ error: "Medication not found" });
+        res.json({
+            status: "Medication deleted",
+            medication_id: medication_id
+        });
     });
 };
 
+exports.insertMedication = (req, res) => {
+    const {name, common_uses} = req.body;
+    if(!name) return res.status(400).json({ error: "Name is required" });
 
-exports.deleteMedication = (req, res) => {
-  const { id } = req.params;
+    const sql = 'INSERT INTO Medication(name, common_uses) VALUES (?, ?)';
+    const values = [name, common_uses || null];
 
-  db.run("DELETE FROM Medication WHERE medication_id = ?", [id], function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    if (this.changes === 0) return res.status(404).json({ error: "Medication not found" });
-    res.json({ message: "Medication deleted successfully" });
-  });
+    db.run(sql, values, function (err) {
+        if(err) return res.status(400).json({error: err.message})
+        
+        res.status(200).json({
+            status: "New Medication create", 
+            MedicationDetails: {
+                medication_id: this.lastID,
+                name: name,
+                common_uses: common_uses
+            }
+        })
+    });
 };
