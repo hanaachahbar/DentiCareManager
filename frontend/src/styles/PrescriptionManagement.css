@@ -11,48 +11,48 @@
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-.prescription-container {
+.prescription-container-prescription {
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
     background-color: #F3F4F6;
     color: #1F2937;
 }
 
-.main-content {
+.main-content-prescription {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 4rem 1rem;
 }
 
-.page-header {
+.page-header-prescription {
     margin-bottom: 1.5rem;
 }
 
-.page-header h1 {
+.page-header-prescription h1 {
     font-size: 1.5rem;
     font-weight: 700;
     color: #1F2937;
     margin-bottom: 0.25rem;
 }
 
-.page-header p {
+.page-header-prescription p {
     font-size: 0.875rem;
     color: #9CA3AF;
 }
 
-.content-grid {
+.content-grid-prescription {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 2rem;
 }
 
 @media (max-width: 1024px) {
-    .content-grid {
+    .content-grid-prescription {
         grid-template-columns: 1fr;
     }
 }
 
-.card {
+.card-prescription {
     background-color: white;
     border-radius: 0.75rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -60,24 +60,24 @@
     margin-bottom: 1.5rem;
 }
 
-.card-header {
+.card-header-prescription {
     padding: 1rem;
     border-bottom: 1px solid #E5E7EB;
 }
 
-.card-header h2 {
+.card-header-prescription h2 {
     font-size: 1.125rem;
     font-weight: 700;
     color: #1F2937;
 }
 
-.prescription-list {
+.prescription-list-prescription {
     padding: 0.5rem;
     max-height: 400px;
     overflow-y: auto;
 }
 
-.prescription-item {
+.prescription-item-prescription {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -88,16 +88,16 @@
     position: relative;
 }
 
-.prescription-item:hover {
+.prescription-item-prescription:hover {
     background-color: #F3F4F6;
 }
 
-.prescription-item.active {
+.prescription-item-prescription.active {
     background-color: #EFF6FF;
     border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
-.prescription-icon {
+.prescription-icon-prescription {
     width: 40px;
     height: 40px;
     display: flex;
@@ -109,28 +109,28 @@
     flex-shrink: 0;
 }
 
-.prescription-item.active .prescription-icon {
+.prescription-item-prescription.active .prescription-icon-prescription {
     background-color: rgba(59, 130, 246, 0.1);
     color: #3B82F6;
 }
 
-.prescription-info {
+.prescription-info-prescription {
     flex: 1;
 }
 
-.prescription-name {
+.prescription-name-prescription {
     font-size: 0.875rem;
     font-weight: 600;
     color: #1F2937;
     margin-bottom: 0.25rem;
 }
 
-.prescription-date {
+.prescription-date-prescription {
     font-size: 0.75rem;
     color: #9CA3AF;
 }
 
-.remove-prescription-btn {
+.remove-prescription-btn-prescription {
     width: 32px;
     height: 32px;
     display: flex;
@@ -145,21 +145,21 @@
     flex-shrink: 0;
 }
 
-.remove-prescription-btn:hover {
+.remove-prescription-btn-prescription:hover {
     background-color: rgba(239, 68, 68, 0.1);
     color: #EF4444;
 }
 
-.remove-prescription-btn .material-symbols-outlined {
+.remove-prescription-btn-prescription .material-symbols-outlined {
     font-size: 1.125rem;
 }
 
-.search-container {
+.search-container-prescription {
     position: relative;
     padding: 1rem;
 }
 
-.search-icon {
+.search-icon-prescription {
     position: absolute;
     left: 1.75rem;
     top: 50%;
@@ -168,7 +168,7 @@
     pointer-events: none;
 }
 
-.search-input {
+.search-input-prescription {
     width: 100%;
     padding: 0.625rem 0.75rem 0.625rem 2.5rem;
     border: 1px solid #E5E7EB;
@@ -179,22 +179,22 @@
     transition: border-color 0.2s;
 }
 
-.search-input:focus {
+.search-input-prescription:focus {
     border-color: #3B82F6;
     background-color: white;
 }
 
-.search-input::placeholder {
+.search-input-prescription::placeholder {
     color: #9CA3AF;
 }
 
-.medication-list {
+.medication-list-prescription {
     padding: 0.5rem;
     max-height: 250px;
     overflow-y: auto;
 }
 
-.medication-item {
+.medication-item-prescription {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -204,11 +204,11 @@
     transition: background-color 0.2s;
 }
 
-.medication-item:hover {
+.medication-item-prescription:hover {
     background-color: #F3F4F6;
 }
 
-.medication-icon {
+.medication-icon-prescription {
     width: 40px;
     height: 40px;
     display: flex;
@@ -220,23 +220,23 @@
     flex-shrink: 0;
 }
 
-.medication-info {
+.medication-info-prescription {
     flex: 1;
 }
 
-.medication-name {
+.medication-name-prescription {
     font-size: 0.875rem;
     font-weight: 600;
     color: #1F2937;
     margin-bottom: 0.25rem;
 }
 
-.medication-dosages {
+.medication-dosages-prescription {
     font-size: 0.75rem;
     color: #9CA3AF;
 }
 
-.add-button {
+.add-button-prescription {
     width: 36px;
     height: 36px;
     display: flex;
@@ -250,16 +250,16 @@
     transition: background-color 0.2s;
 }
 
-.add-button:hover {
+.add-button-prescription:hover {
     background-color: rgba(59, 130, 246, 0.2);
 }
 
-.add-medication-button-container {
+.add-medication-button-container-prescription {
     padding: 1rem;
     padding-bottom: 0;
 }
 
-.add-medication-button {
+.add-medication-button-prescription {
     width: 100%;
     display: flex;
     align-items: center;
@@ -277,25 +277,25 @@
     transition: all 0.2s;
 }
 
-.add-medication-button:hover {
+.add-medication-button-prescription:hover {
     background-color: rgba(59, 130, 246, 0.1);
     color: #2563EB;
 }
 
-.add-medication-button .material-symbols-outlined {
+.add-medication-button-prescription .material-symbols-outlined {
     font-size: 1.25rem;
 }
 
-.details-section {
+.details-section-prescription {
     min-height: 500px;
 }
 
-.details-card {
+.details-card-prescription {
     padding: 1.5rem;
     margin-bottom: 0;
 }
 
-.details-header {
+.details-header-prescription {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -303,19 +303,19 @@
     border-bottom: 1px solid #E5E7EB;
 }
 
-.details-header h2 {
+.details-header-prescription h2 {
     font-size: 1.25rem;
     font-weight: 700;
     color: #1F2937;
     margin-bottom: 0.25rem;
 }
 
-.details-header p {
+.details-header-prescription p {
     font-size: 0.875rem;
     color: #9CA3AF;
 }
 
-.print-button {
+.print-button-prescription {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -330,15 +330,15 @@
     transition: background-color 0.2s;
 }
 
-.print-button:hover {
+.print-button-prescription:hover {
     background-color: #F3F4F6;
 }
 
-.print-button .material-symbols-outlined {
+.print-button-prescription .material-symbols-outlined {
     font-size: 1rem;
 }
 
-.details-grid {
+.details-grid-prescription {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
@@ -346,28 +346,28 @@
 }
 
 @media (max-width: 768px) {
-    .details-grid {
+    .details-grid-prescription {
         grid-template-columns: 1fr;
     }
 }
 
-.form-group {
+.form-group-prescription {
     display: flex;
     flex-direction: column;
 }
 
-.form-group.full-width {
+.form-group-prescription.full-width-prescription {
     grid-column: 1 / -1;
 }
 
-.form-group label {
+.form-group-prescription label {
     font-size: 0.75rem;
     font-weight: 500;
     color: #6B7280;
     margin-bottom: 0.25rem;
 }
 
-.input-display {
+.input-display-prescription {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -377,18 +377,18 @@
     background-color: rgba(243, 244, 246, 0.5);
 }
 
-.input-display .material-symbols-outlined {
+.input-display-prescription .material-symbols-outlined {
     color: #9CA3AF;
 }
 
-.input-display p {
+.input-display-prescription p {
     font-size: 0.875rem;
     font-weight: 600;
     color: #1F2937;
 }
 
-.form-input,
-.form-textarea {
+.form-input-prescription,
+.form-textarea-prescription {
     padding: 0.75rem;
     border: 1px solid #E5E7EB;
     border-radius: 0.375rem;
@@ -400,17 +400,17 @@
     transition: border-color 0.2s;
 }
 
-.form-input:focus,
-.form-textarea:focus {
+.form-input-prescription:focus,
+.form-textarea-prescription:focus {
     border-color: #3B82F6;
 }
 
-.form-textarea {
+.form-textarea-prescription {
     resize: vertical;
     min-height: 80px;
 }
 
-.details-footer {
+.details-footer-prescription {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -419,12 +419,12 @@
     border-top: 1px solid #E5E7EB;
 }
 
-.created-date {
+.created-date-prescription {
     font-size: 0.75rem;
     color: #9CA3AF;
 }
 
-.save-button {
+.save-button-prescription {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -439,21 +439,21 @@
     transition: all 0.2s;
 }
 
-.save-button.active {
+.save-button-prescription.active {
     background-color: #10B981;
     color: white;
     cursor: pointer;
 }
 
-.save-button.active:hover {
+.save-button-prescription.active:hover {
     background-color: #059669;
 }
 
-.save-button .material-symbols-outlined {
+.save-button-prescription .material-symbols-outlined {
     font-size: 1rem;
 }
 
-.empty-state {
+.empty-state-prescription {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -462,48 +462,48 @@
     text-align: center;
 }
 
-.empty-icon {
+.empty-icon-prescription {
     font-size: 4rem;
     color: #D1D5DB;
     margin-bottom: 1rem;
 }
 
-.empty-state h3 {
+.empty-state-prescription h3 {
     font-size: 1.125rem;
     font-weight: 600;
     color: #1F2937;
     margin-bottom: 0.5rem;
 }
 
-.empty-state p {
+.empty-state-prescription p {
     font-size: 0.875rem;
     color: #9CA3AF;
 }
 
-.prescription-list::-webkit-scrollbar,
-.medication-list::-webkit-scrollbar {
+.prescription-list-prescription::-webkit-scrollbar,
+.medication-list-prescription::-webkit-scrollbar {
     width: 6px;
 }
 
-.prescription-list::-webkit-scrollbar-track,
-.medication-list::-webkit-scrollbar-track {
+.prescription-list-prescription::-webkit-scrollbar-track,
+.medication-list-prescription::-webkit-scrollbar-track {
     background: #F3F4F6;
     border-radius: 3px;
 }
 
-.prescription-list::-webkit-scrollbar-thumb,
-.medication-list::-webkit-scrollbar-thumb {
+.prescription-list-prescription::-webkit-scrollbar-thumb,
+.medication-list-prescription::-webkit-scrollbar-thumb {
     background: #D1D5DB;
     border-radius: 3px;
 }
 
-.prescription-list::-webkit-scrollbar-thumb:hover,
-.medication-list::-webkit-scrollbar-thumb:hover {
+.prescription-list-prescription::-webkit-scrollbar-thumb:hover,
+.medication-list-prescription::-webkit-scrollbar-thumb:hover {
     background: #9CA3AF;
 }
 
 /* Modal Styles (from AddNewMedicament.css) */
-.add-new-medicament {
+.add-new-medicament-prescription {
   position: fixed;
   top: 0;
   left: 0;
@@ -516,7 +516,7 @@
   z-index: 9999;
 }
 
-.Form-container {
+.form-container-prescription {
   background: white;
   width: 90%;
   max-width: 550px;
@@ -530,14 +530,14 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-.modal-title {
+.modal-title-prescription {
   font-size: 24px;
   font-weight: 900;
   text-align: center;
   margin-bottom: 10px;
 }
 
-.close-btn {
+.close-btn-prescription {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -550,15 +550,15 @@
   transition: background 0.2s;
 }
 
-.close-btn:hover {
+.close-btn-prescription:hover {
   background: #f1f5f5;
 }
 
-.close-btn .material-symbols-outlined {
+.close-btn-prescription .material-symbols-outlined {
   font-size: 22px;
 }
 
-.submit-btn {
+.submit-btn-prescription {
   width: 100%;
   margin-top: 12px;
   height: 46px;
@@ -572,18 +572,18 @@
   transition: background 0.2s ease;
 }
 
-.submit-btn:hover {
+.submit-btn-prescription:hover {
   background: #0fa5d8;
 }
 
 @media (max-width: 480px) {
-  .Form-container {
+  .form-container-prescription {
     width: 95%;
     padding: 24px 20px;
     border-radius: 10px;
   }
 
-  .modal-title {
+  .modal-title-prescription {
     font-size: 20px;
   }
 }
@@ -591,4 +591,73 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* print part */
+body {
+  font-family: Arial, sans-serif;
+  color: #1F2937;
+  padding: 20px;
+}
+
+.print-container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.print-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.print-header h2 {
+  font-size: 26px;
+  margin-bottom: 5px;
+}
+
+.print-header p {
+  margin: 2px 0;
+  font-size: 16px;
+}
+
+.print-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  page-break-inside: avoid;
+}
+
+.card-header h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.card-row {
+  display: flex;
+  padding: 3px 0;
+}
+
+.label {
+  flex: 0 0 180px;
+  font-weight: bold;
+  color: #374151;
+}
+
+.value {
+  flex: 1;
+  color: #1F2937;
+}
+
+@media print {
+  body {
+    margin: 0;
+  }
+  .print-card {
+    border: 1px solid #000;
+    background-color: #fff;
+  }
 }

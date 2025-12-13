@@ -66,13 +66,14 @@ exports.getPatients = (req, res) => {
         return res.status(500).json({ error: err.message });
       }
 
-    const formattedRows = rows.map(patient => ({
-      ...patient,
-      allergies: patient.allergies ? JSON.parse(patient.allergies) : [],
-      chronic_conditions: patient.chronic_conditions ? JSON.parse(patient.chronic_conditions) : [],
-      hereditary_conditions: patient.hereditary_conditions ? JSON.parse(patient.hereditary_conditions) : []
-    }));
-    res.json(formattedRows);
+      const formattedRows = rows.map(patient => ({
+        ...patient,
+        allergies: patient.allergies ? JSON.parse(patient.allergies) : [],
+        chronic_conditions: patient.chronic_conditions ? JSON.parse(patient.chronic_conditions) : [],
+        hereditary_conditions: patient.hereditary_conditions ? JSON.parse(patient.hereditary_conditions) : []
+      }));
+      res.json(formattedRows);
+    });
   });
 };
 
