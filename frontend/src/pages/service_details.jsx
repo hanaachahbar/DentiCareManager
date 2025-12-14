@@ -222,14 +222,13 @@ const ServiceDetails = () => {
     }
   };
 
-  const handleAddPrescription = (appointmentId) => {
-    navigate(`/prescription_management?appointment_id=${appointmentId}`);
-  };
+const handleAddPrescription = (appointmentId) => {
+  navigate(`/prescription_management/${appointmentId}`);
+};
 
-  const handleOpenPrescription = (appointmentId) => {
-    navigate(`/prescriptions/${appointmentId}`);
-  };
-
+const handleOpenPrescription = (appointmentId) => {
+  navigate(`/prescription_management/${appointmentId}`);
+};
   // BILL MODAL - UPDATED
   const openBillModal = (appointmentId, existingInvoice) => {
     setBillModal({
