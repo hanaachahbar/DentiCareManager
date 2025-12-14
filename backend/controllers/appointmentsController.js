@@ -364,6 +364,159 @@ exports.updateAppointment = (req, res) => {
   });
 };
 
+// NEW: Bulk reschedule appointments by date
+exports.bulkReschedule = (req, res) => {
+  const { original_date, new_date, hours_offset } = req.body;
+
+  // Validate required fields
+  if (!original_date) {
+    return res.status(400).json({ 
+      error: "original_date is required" 
+    });
+  }
+
+  if (!new_date && !hours_offset) {
+    return res.status(400).json({ 
+      error: "Either new_date or hours_offset is required" 
+    });
+  }
+
+  // Validate hours_offset if provided
+  if (hours_offset !== undefined && isNaN(parseInt(hours_offset))) {
+    return res.status(400).json({ 
+      error: "hours_offset must be a number" 
+    });
+  }
+
+  // First, get all appointments for the original date
+  const getAppointmentsQuery = `
+    SELECT 
+      a.*,
+      s.service_name,
+      p.first_name,
+      p.last_name
+    FROM Appointment a
+    JOIN Services s ON a.service_id = s.service_id
+    JOIN Patient p ON s.patient_id = p.patient_id
+    WHERE a.appointment_date = ?
+    AND a.status != 'cancelled'
+  `;
+
+  db.all(getAppointmentsQuery, [original_date], (err, appointments) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (appointments.length === 0) {
+      return res.status(404).json({ 
+        error: "No non-cancelled appointments found for the specified date" 
+      });
+    }
+
+    // Prepare updates
+    const updates = [];
+    const hoursToAdd = hours_offset ? parseInt(hours_offset) : 0;
+
+    appointments.forEach(apt => {
+      let updatedDate = new_date || apt.appointment_date;
+      let updatedTime = apt.appointment_time;
+
+      // If hours_offset is provided, adjust the time
+      if (hours_offset && apt.appointment_time) {
+        const [hours, minutes] = apt.appointment_time.split(':').map(Number);
+        let newHours = hours + hoursToAdd;
+        
+        // Handle day overflow/underflow
+        while (newHours >= 24) {
+          newHours -= 24;
+          // Increment date by 1 day
+          const date = new Date(updatedDate);
+          date.setDate(date.getDate() + 1);
+          updatedDate = date.toISOString().split('T')[0];
+        }
+        
+        while (newHours < 0) {
+          newHours += 24;
+          // Decrement date by 1 day
+          const date = new Date(updatedDate);
+          date.setDate(date.getDate() - 1);
+          updatedDate = date.toISOString().split('T')[0];
+        }
+
+        updatedTime = `${newHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      }
+
+      updates.push({
+        id: apt.appointment_id,
+        date: updatedDate,
+        time: updatedTime
+      });
+    });
+
+    // Execute all updates
+    let completed = 0;
+    const errors = [];
+    const updatedAppointments = [];
+
+    updates.forEach(update => {
+      const sql = `
+        UPDATE Appointment 
+        SET appointment_date = ?, appointment_time = ?
+        WHERE appointment_id = ?
+      `;
+
+      db.run(sql, [update.date, update.time, update.id], function(err) {
+        if (err) {
+          errors.push({ appointment_id: update.id, error: err.message });
+        } else {
+          updatedAppointments.push(update.id);
+        }
+
+        completed++;
+
+        // When all updates are done
+        if (completed === updates.length) {
+          if (errors.length > 0) {
+            return res.status(500).json({
+              message: "Some appointments failed to update",
+              updated: updatedAppointments,
+              errors: errors
+            });
+          }
+
+          // Get updated appointments with full details
+          const ids = updatedAppointments.join(',');
+          const finalQuery = `
+            SELECT 
+              a.*,
+              s.service_name,
+              s.patient_id,
+              p.first_name,
+              p.last_name,
+              p.phone_number
+            FROM Appointment a
+            JOIN Services s ON a.service_id = s.service_id
+            JOIN Patient p ON s.patient_id = p.patient_id
+            WHERE a.appointment_id IN (${ids})
+          `;
+
+          db.all(finalQuery, [], (err, finalAppointments) => {
+            if (err) {
+              return res.status(500).json({ error: err.message });
+            }
+
+            res.json({
+              message: `Successfully rescheduled ${updatedAppointments.length} appointment(s)`,
+              count: updatedAppointments.length,
+              appointments: finalAppointments
+            });
+          });
+        }
+      });
+    });
+  });
+};
+
 // Delete appointment
 exports.deleteAppointment = (req, res) => {
   const { id } = req.params;
@@ -453,6 +606,39 @@ exports.getUpcomingAppointments = (req, res) => {
     }
 
     res.json({ 
+      count: appointments.length,
+      appointments 
+    });
+  });
+};
+
+// NEW: Get appointments by specific date
+exports.getAppointmentsByDate = (req, res) => {
+  const { date } = req.params;
+
+  const query = `
+    SELECT 
+      a.*,
+      s.service_name,
+      s.patient_id,
+      p.first_name,
+      p.last_name,
+      p.phone_number,
+      p.email
+    FROM Appointment a
+    JOIN Services s ON a.service_id = s.service_id
+    JOIN Patient p ON s.patient_id = p.patient_id
+    WHERE a.appointment_date = ?
+    ORDER BY a.appointment_time ASC
+  `;
+
+  db.all(query, [date], (err, appointments) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    res.json({ 
+      date,
       count: appointments.length,
       appointments 
     });
