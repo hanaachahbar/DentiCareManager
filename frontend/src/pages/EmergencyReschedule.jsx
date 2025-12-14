@@ -1,29 +1,90 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Calendar, Clock, AlertTriangle, Edit2, Trash2, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Calendar, Clock, AlertTriangle, Edit2, Trash2, Search, Loader } from 'lucide-react';
 import '../styles/EmergencyReschedule.css';
 
-const EmergencyReschedule2 = () => {
-  // All appointments from database
-  const [allAppointments] = useState([
-    { id: '12345', patient: 'John Doe', originalDate: '2024-10-05', originalTime: '09:00 AM', newDate: '2024-10-05', newTime: '09:00', status: 'Confirmed', reason: 'Routine Check-up', isEditing: false },
-    { id: '12346', patient: 'Jane Smith', originalDate: '2024-10-05', originalTime: '10:30 AM', newDate: '2024-10-05', newTime: '10:30', status: 'Pending', reason: 'Filling', isEditing: false },
-    { id: '12347', patient: 'Michael Johnson', originalDate: '2024-10-05', originalTime: '02:00 PM', newDate: '2024-10-05', newTime: '14:00', status: 'Confirmed', reason: 'Cleaning', isEditing: false },
-    { id: '12348', patient: 'Emily Williams', originalDate: '2024-10-04', originalTime: '11:00 AM', newDate: '2024-10-04', newTime: '11:00', status: 'Cancelled', reason: 'Consultation', isEditing: false },
-    { id: '12349', patient: 'David Brown', originalDate: '2024-10-06', originalTime: '09:30 AM', newDate: '2024-10-06', newTime: '09:30', status: 'Confirmed', reason: 'X-Ray', isEditing: false },
-    { id: '12350', patient: 'Sarah Wilson', originalDate: '2024-10-07', originalTime: '01:00 PM', newDate: '2024-10-07', newTime: '13:00', status: 'Pending', reason: 'Blood Test', isEditing: false },
-    { id: '12351', patient: 'Robert Taylor', originalDate: '2024-10-10', originalTime: '10:00 AM', newDate: '2024-10-10', newTime: '10:00', status: 'Confirmed', reason: 'Follow-up', isEditing: false },
-    { id: '12352', patient: 'Lisa Anderson', originalDate: '2024-10-12', originalTime: '03:00 PM', newDate: '2024-10-12', newTime: '15:00', status: 'Pending', reason: 'Consultation', isEditing: false },
-    { id: '12353', patient: 'James Martinez', originalDate: '2024-10-15', originalTime: '11:30 AM', newDate: '2024-10-15', newTime: '11:30', status: 'Confirmed', reason: 'Vaccination', isEditing: false },
-    { id: '12354', patient: 'Maria Garcia', originalDate: '2024-10-20', originalTime: '02:30 PM', newDate: '2024-10-20', newTime: '14:30', status: 'Confirmed', reason: 'Checkup', isEditing: false },
-  ]);
+// Adjust this to match YOUR backend server port
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
-  const [appointments, setAppointments] = useState(allAppointments);
+const EmergencyReschedule = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [bulkDate, setBulkDate] = useState('');
   const [bulkDuration, setBulkDuration] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editingAppointments, setEditingAppointments] = useState({});
+
+  // Fetch all appointments on component mount
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Fetching from:', `${API_BASE_URL}/appointments`);
+      const response = await fetch(`${API_BASE_URL}/appointments`);
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers.get('content-type'));
+      
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Error response:', text);
+        throw new Error(`Failed to fetch appointments: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform backend data to frontend format
+      const transformedAppointments = data.appointments.map(apt => ({
+        id: apt.appointment_id.toString(),
+        patient: `${apt.first_name} ${apt.last_name}`,
+        originalDate: apt.appointment_date,
+        originalTime: formatTimeFromBackend(apt.appointment_time),
+        newDate: apt.appointment_date,
+        newTime: apt.appointment_time || '09:00',
+        status: capitalizeStatus(apt.status),
+        reason: apt.description || 'Not specified',
+        isEditing: false,
+        patientId: apt.patient_id,
+        serviceId: apt.service_id,
+        serviceName: apt.service_name
+      }));
+      
+      setAppointments(transformedAppointments);
+      setAllAppointments(transformedAppointments);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching appointments:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to format time from backend (24-hour) to display (12-hour)
+  const formatTimeFromBackend = (time24) => {
+    if (!time24) return '09:00 AM';
+    const [hour, minute] = time24.split(':').map(Number);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
+  };
+
+  // Helper function to capitalize status
+  const capitalizeStatus = (status) => {
+    if (!status) return 'Pending';
+    return status.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join('-');
+  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -46,44 +107,113 @@ const EmergencyReschedule2 = () => {
     ));
   };
 
-  const toggleEdit = (id) => {
+  const toggleEdit = async (id) => {
+    const appointment = appointments.find(apt => apt.id === id);
+    
+    // If currently editing, save the changes
+    if (appointment.isEditing) {
+      await saveAppointmentChanges(appointment);
+    }
+    
+    // Toggle edit mode
     setAppointments(appointments.map(apt => 
       apt.id === id ? { ...apt, isEditing: !apt.isEditing } : apt
     ));
   };
 
-  const handleBulkReschedule = () => {
+  const saveAppointmentChanges = async (appointment) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/appointments/${appointment.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appointment_date: appointment.newDate,
+          appointment_time: appointment.newTime,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update appointment');
+      }
+
+      const data = await response.json();
+      showSuccess('Appointment updated successfully');
+      
+      // Refresh appointments list
+      await fetchAppointments();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error updating appointment:', err);
+    }
+  };
+
+  const handleBulkReschedule = async () => {
     if (!bulkDate || !bulkDuration) {
       alert('Please fill in both date and duration for bulk reschedule');
       return;
     }
 
     const hours = parseInt(bulkDuration);
-    
-    const updatedAppointments = appointments.map(apt => {
-      const [time, period] = apt.originalTime.split(' ');
-      let [hour, minute] = time.split(':').map(Number);
-      
-      // Convert to 24-hour format
-      if (period === 'PM' && hour !== 12) hour += 12;
-      if (period === 'AM' && hour === 12) hour = 0;
-      
-      // Add duration
-      hour += hours;
-      
-      const newTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      
-      return {
-        ...apt,
-        newDate: bulkDate,
-        newTime: newTime,
-        isEditing: false
-      };
-    });
+    if (isNaN(hours)) {
+      alert('Duration must be a number');
+      return;
+    }
 
-    setAppointments(updatedAppointments);
-    setShowSuccessMessage(true);
-    setTimeout(() => setShowSuccessMessage(false), 3000);
+    try {
+      setLoading(true);
+      
+      const url = `${API_BASE_URL}/appointments/bulk-reschedule`;
+      console.log('Bulk reschedule URL:', url);
+      console.log('Request body:', {
+        original_date: bulkDate,
+        new_date: bulkDate,
+        hours_offset: hours,
+      });
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          original_date: bulkDate,
+          new_date: bulkDate,
+          hours_offset: hours,
+        }),
+      });
+
+      console.log('Bulk reschedule response status:', response.status);
+      console.log('Content-Type:', response.headers.get('content-type'));
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Error response:', text);
+        
+        try {
+          const errorData = JSON.parse(text);
+          throw new Error(errorData.error || 'Failed to bulk reschedule');
+        } catch (e) {
+          throw new Error(`Failed to bulk reschedule: ${response.status} - ${text.substring(0, 100)}`);
+        }
+      }
+
+      const data = await response.json();
+      showSuccess(`Successfully rescheduled ${data.count} appointment(s)`);
+      
+      // Refresh appointments list
+      await fetchAppointments();
+      
+      // Reset bulk reschedule fields
+      setBulkDate('');
+      setBulkDuration('');
+    } catch (err) {
+      alert(err.message);
+      console.error('Error bulk rescheduling:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteClick = (appointment) => {
@@ -91,11 +221,31 @@ const EmergencyReschedule2 = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
-    const updatedAppointments = appointments.filter(apt => apt.id !== appointmentToDelete.id);
-    setAppointments(updatedAppointments);
-    setShowDeleteConfirm(false);
-    setAppointmentToDelete(null);
+  const confirmDelete = async () => {
+    if (!appointmentToDelete) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/appointments/${appointmentToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete appointment');
+      }
+
+      showSuccess('Appointment deleted successfully');
+      
+      // Remove from local state
+      const updatedAppointments = appointments.filter(apt => apt.id !== appointmentToDelete.id);
+      setAppointments(updatedAppointments);
+      setAllAppointments(updatedAppointments);
+      
+      setShowDeleteConfirm(false);
+      setAppointmentToDelete(null);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error deleting appointment:', err);
+    }
   };
 
   const cancelDelete = () => {
@@ -121,21 +271,52 @@ const EmergencyReschedule2 = () => {
     }
   };
 
-  const handleSaveChanges = () => {
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 3000);
   };
 
-  const handleNotify = (id) => {
-    alert(`Notification sent to patient for appointment #${id}`);
+  const handleSaveChanges = async () => {
+    // Save all appointments that are currently in edit mode
+    const editingApts = appointments.filter(apt => apt.isEditing);
+    
+    if (editingApts.length === 0) {
+      showSuccess('No changes to save');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Save each appointment
+      for (const apt of editingApts) {
+        await saveAppointmentChanges(apt);
+      }
+      
+      showSuccess(`Successfully saved ${editingApts.length} appointment(s)`);
+      
+      // Turn off edit mode for all
+      setAppointments(appointments.map(apt => ({ ...apt, isEditing: false })));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const convert24to12Hour = (time24) => {
-    const [hour, minute] = time24.split(':').map(Number);
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
-  };
+  if (loading && appointments.length === 0) {
+    return (
+      <div className="container">
+        <div className="content-wrapper">
+          <div className="loading-state">
+            <Loader className="spinner" size={48} />
+            <p>Loading appointments...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -152,7 +333,7 @@ const EmergencyReschedule2 = () => {
                 <p className="subtitle">Modify and reschedule appointments.</p>
               </div>
             </div>
-            <button onClick={handleSaveChanges} className="save-button">
+            <button onClick={handleSaveChanges} className="save-button" disabled={loading}>
               <Calendar size={20} />
               Save Changes
             </button>
@@ -162,7 +343,15 @@ const EmergencyReschedule2 = () => {
           {showSuccessMessage && (
             <div className="success-message">
               <Calendar size={20} />
-              <span>Changes saved successfully!</span>
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="error-message">
+              <AlertTriangle size={20} />
+              <span>{error}</span>
             </div>
           )}
 
@@ -173,7 +362,7 @@ const EmergencyReschedule2 = () => {
               <div className="bulk-text">
                 <h3 className="bulk-title">Bulk Reschedule</h3>
                 <p className="bulk-description">
-                  Reschedule all of today's appointments to a new date or by a duration.
+                  Select a date and specify hours to reschedule all appointments from that date.
                 </p>
               </div>
             </div>
@@ -185,20 +374,24 @@ const EmergencyReschedule2 = () => {
                   value={bulkDate}
                   onChange={(e) => setBulkDate(e.target.value)}
                   className="date-input"
-                  placeholder="10/27/2023"
+                  placeholder="Select date"
                 />
               </div>
               <div className="input-group">
                 <input
-                  type="text"
+                  type="number"
                   value={bulkDuration}
                   onChange={(e) => setBulkDuration(e.target.value)}
                   className="duration-input"
-                  placeholder="e.g., 2 hours"
+                  placeholder="Hours (e.g., 2)"
                 />
               </div>
-              <button onClick={handleBulkReschedule} className="apply-button">
-                Apply
+              <button 
+                onClick={handleBulkReschedule} 
+                className="apply-button"
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Apply'}
               </button>
             </div>
           </div>
@@ -355,4 +548,4 @@ const EmergencyReschedule2 = () => {
   );
 };
 
-export default EmergencyReschedule2;
+export default EmergencyReschedule;
