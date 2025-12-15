@@ -57,6 +57,8 @@ const PatientList = () => {
         formatted_dob: patient.date_of_birth || patient.dob || 'N/A',
         lastVisit: patient.lastVisit || 'N/A'
       }));
+
+      console.log("aaaaaaaaaaaaaaaaaaa:", formattedPatients);
       
       setAllPatients(formattedPatients);
       setFilteredPatients(formattedPatients);
@@ -293,16 +295,14 @@ const PatientList = () => {
                           : 'None'}
                       </td>
                       <td>
-                        {Array.isArray(patient.chronique || patient.chronic_conditions) &&
-                        (patient.chronique || patient.chronic_conditions).length
-                          ? (patient.chronique || patient.chronic_conditions).join(', ')
-                          : 'None'}
+                        {Array.isArray(patient.chronique) && patient.chronique.length
+                        ? patient.chronique.join(', ')
+                        : 'None'}
                       </td>
                       <td>
-                        {Array.isArray(patient.hereditaire || patient.hereditary_conditions) &&
-                        (patient.hereditaire || patient.hereditary_conditions).length
-                          ? (patient.hereditaire || patient.hereditary_conditions).join(', ')
-                          : 'None'}
+                        {Array.isArray(patient.hereditaire) && patient.hereditaire.length
+                        ? patient.hereditaire.join(', ')
+                        : 'None'}
                       </td>
                       {/* <td>{formatDate(patient.lastVisit)}</td> */}
                     </tr>
