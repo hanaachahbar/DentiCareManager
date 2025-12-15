@@ -3,6 +3,7 @@ import '../styles/MedicamentsDrugsList.css';
 import AddNewMedicament from './AddNewMedicament';
 import axios from 'axios';
 
+// API Base URL - Change this to match your backend
 const API_BASE_URL = 'http://localhost:5000/api/medications';
 
 function MedicamentsDrugList() {
@@ -17,6 +18,7 @@ function MedicamentsDrugList() {
   
   const itemsPerPage = 8;
 
+  // Fetch all medications from database
   useEffect(() => {
     fetchMedications();
   }, []);
@@ -38,6 +40,7 @@ function MedicamentsDrugList() {
     }
   };
 
+  // Function to handle adding new medication
   const handleAddMedication = async (newMed) => {
     try {
       console.log('Adding medication:', newMed);
@@ -48,6 +51,7 @@ function MedicamentsDrugList() {
       console.log('Add response:', response.data);
 
       if (response.data.status === "New Medication create") {
+        // Refresh the medications list
         await fetchMedications();
         setShowAddForm(false);
       }
@@ -58,6 +62,7 @@ function MedicamentsDrugList() {
     }
   };
 
+  // Function to handle editing medication
   const handleEditMedication = async (medId, newCommonUses) => {
     try {
       console.log('Updating medication:', medId, newCommonUses);
@@ -67,6 +72,7 @@ function MedicamentsDrugList() {
       console.log('Update response:', response.data);
 
       if (response.data.status === "medication updated") {
+        // Update local state
         setMedications(medications.map(med => 
           med.medication_id === medId ? { ...med, common_uses: newCommonUses } : med
         ));
@@ -80,6 +86,7 @@ function MedicamentsDrugList() {
     }
   };
 
+  // Function to handle deleting medication
   const handleDeleteMedication = async (medId) => {
     if (window.confirm('Are you sure you want to delete this medication?')) {
       try {
@@ -99,24 +106,29 @@ function MedicamentsDrugList() {
     }
   };
 
+  // Function to start editing
   const handleEditClick = (med) => {
     setEditingMed(med.medication_id);
     setEditingCommonUses(med.common_uses);
   };
 
+  // Function to cancel editing
   const handleCancelEdit = () => {
     setEditingMed(null);
     setEditingCommonUses('');
   };
 
+  // Function to save edit
   const handleSaveEdit = (medId) => {
     handleEditMedication(medId, editingCommonUses);
   };
 
+  // Function to close the add form modal
   const handleCloseForm = () => {
     setShowAddForm(false);
   };
 
+  // Filter medications based on search
   const filteredMedications = useMemo(() => {
     return medications.filter(med => {
       const matchesSearch = med.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,6 +137,7 @@ function MedicamentsDrugList() {
     });
   }, [medications, searchTerm]);
 
+  // Pagination logic
   const totalPages = Math.ceil(filteredMedications.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -176,8 +189,10 @@ function MedicamentsDrugList() {
 
   return (
     <div className="dental-flow-medication">
+      {/* Main Content */}
       <main className="main-content-medication">
         <div className="content-wrapper-medication">
+          {/* Page Heading */}
           <div className="page-heading-medication">
             <div>
               <h1 className="page-title-medication">Medicaments & Drugs</h1>
@@ -191,6 +206,7 @@ function MedicamentsDrugList() {
             </div>
           </div>
 
+          {/* Search Bar */}
           <div className="filter-section-medication">
             <div className="search-bar-medication">
                 <div className="search-icon-medication">
@@ -206,6 +222,7 @@ function MedicamentsDrugList() {
             </div>
           </div>
 
+          {/* Data Table */}
           <div className="table-container-medication">
             <table className="medications-table-medication">
               <thead>
@@ -285,6 +302,7 @@ function MedicamentsDrugList() {
             </table>
           </div>
 
+          {/* Pagination */}
           <div className="pagination-section-medication">
             <p className="pagination-info-medication">
               Showing {filteredMedications.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredMedications.length)} of {filteredMedications.length} results
@@ -317,6 +335,7 @@ function MedicamentsDrugList() {
           </div>
         </div>
 
+        {/* Add Form Modal */}
         {showAddForm && (
             <div className="add-medicament-container-medication">
                 <AddNewMedicament
