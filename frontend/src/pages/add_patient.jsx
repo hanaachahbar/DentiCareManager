@@ -205,8 +205,8 @@ export default function AddPatient() {
             <UserRound/>
         </div>
         <div>
-          <h1>Add New Patient</h1>
-          <p>Fill in the details to add a new patient record.</p>
+          <h1>{id ? "Edit": "Add new"} Patient</h1>
+          <p>{id ? "You can edit the details above": "Fill in the details to add a new patient record"}</p>
         </div>
       </div>
 
@@ -486,7 +486,7 @@ export default function AddPatient() {
         <button type="button" className="cancel-btn"
         onClick={() => navigate(-1)}>Cancel</button>
         <button type="button" className="save-btn" onClick={handleSubmit}>
-          {id ? "Save": "Save Patient"}
+          {id ? "Save": "Add Patient"}
         </button>
       </div>
 
