@@ -21,7 +21,7 @@ exports.getAllLabServices = (req, res) => {
 
 
 
-// Get all services for a certain lab
+//Get all services for a certain lab
 exports.getServicesByLabId = (req, res) => {
     const { lab_id } = req.params;
     const query = `
