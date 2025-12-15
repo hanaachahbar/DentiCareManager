@@ -287,9 +287,23 @@ const PatientList = () => {
                       </td>
                       <td>{formatDate(patient.date_of_birth || patient.dob)}</td>
                       <td>{patient.contact || patient.phone_number || 'N/A'}</td>
-                      <td>{patient.allergies || 'None'}</td>
-                      <td>{patient.chronique || patient.chronic_conditions || 'None'}</td>
-                      <td>{patient.hereditaire || patient.hereditary_conditions || 'None'}</td>
+                      <td>
+                        {Array.isArray(patient.allergies) && patient.allergies.length
+                          ? patient.allergies.join(', ')
+                          : 'None'}
+                      </td>
+                      <td>
+                        {Array.isArray(patient.chronique || patient.chronic_conditions) &&
+                        (patient.chronique || patient.chronic_conditions).length
+                          ? (patient.chronique || patient.chronic_conditions).join(', ')
+                          : 'None'}
+                      </td>
+                      <td>
+                        {Array.isArray(patient.hereditaire || patient.hereditary_conditions) &&
+                        (patient.hereditaire || patient.hereditary_conditions).length
+                          ? (patient.hereditaire || patient.hereditary_conditions).join(', ')
+                          : 'None'}
+                      </td>
                       {/* <td>{formatDate(patient.lastVisit)}</td> */}
                     </tr>
                   ))}

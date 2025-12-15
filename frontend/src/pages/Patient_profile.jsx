@@ -358,13 +358,25 @@ const PatientProfile = () => {
                 <div className="medical-item">
                   <p className="medical-label">Allergies</p>
                   <p className="medical-value medical-danger">
-                    {patient.allergies || 'None'}
+                    {patient.allergies.length > 0
+                    ? patient.allergies.join(', ')
+                    : 'None'}
                   </p>
                 </div>
                 <div className="medical-item">
                   <p className="medical-label">Chronic conditions</p>
                   <p className="medical-value">
-                    {patient.chronic_conditions || 'None'}
+                    {patient.chronic_conditions.length > 0
+                    ? patient.chronic_conditions.join(', ')
+                    : 'None'}
+                  </p>
+                </div>
+                <div className="medical-item">
+                  <p className="medical-label">Hereditary conditions</p>
+                  <p className="medical-value">
+                    {patient.hereditary_conditions.length > 0
+                    ? patient.hereditary_conditions.join(', ')
+                    : 'None'}
                   </p>
                 </div>
                 <div className="medical-item">
