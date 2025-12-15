@@ -85,7 +85,7 @@ function PrescriptionManagement() {
   // Delete prescription
   const handleRemovePrescription = async (prescription, e) => {
     e.stopPropagation();
-    if (!window.confirm("Are you sure you want to remove this prescription?")) return;
+    if (!window.confirm("Are you sure you want to remove this medicament?")) return;
 
     const medication_id = prescription.medication_id;
     try {
@@ -93,7 +93,7 @@ function PrescriptionManagement() {
       await loadAllData();
     } catch (err) {
       console.error("delete error:", err.response?.data || err.message);
-      alert("Failed to remove prescription.");
+      alert("Failed to remove medicament.");
     }
   };
 
@@ -136,10 +136,10 @@ function PrescriptionManagement() {
       await axios.put(`${API_BASE}/${appointmentId}/${medication_id}`, payload);
       setIsEditing(false);
       await loadAllData();
-      alert("Prescription saved successfully!");
+      alert("Medicament saved successfully!");
     } catch (err) {
       console.error("save error:", err.response?.data || err.message);
-      alert("Failed to save prescription.");
+      alert("Failed to save medicament.");
     }
   };
 
@@ -174,7 +174,7 @@ function PrescriptionManagement() {
         const common = p.common_uses || "—";
         return `
         <div class="print-card">
-          <div class="card-header"><h3>Prescription #${idx + 1}</h3></div>
+          <div class="card-header"><h3>Medication #${idx + 1}</h3></div>
           <div class="card-row"><span class="label">Medication:</span> <span class="value">${medName}</span></div>
           <div class="card-row"><span class="label">Common Uses:</span> <span class="value">${common}</span></div>
           <div class="card-row"><span class="label">Dosage:</span> <span class="value">${p.dosage || '—'}</span></div>
@@ -238,11 +238,11 @@ function PrescriptionManagement() {
             {/* Assigned Prescriptions */}
             <div className="card-prescription">
               <div className="card-header-prescription">
-                <h2>Assigned Prescriptions</h2>
+                <h2>Assigned Medicaments</h2>
               </div>
               <div className="prescription-list-prescription">
                 {assignedPrescriptions.length === 0 ? (
-                  <div style={{ padding: 16 }}>No prescriptions assigned.</div>
+                  <div style={{ padding: 16 }}>No medicaments assigned.</div>
                 ) : (
                   assignedPrescriptions.map((prescription) => (
                     <div
@@ -325,7 +325,7 @@ function PrescriptionManagement() {
               <div className="card-prescription details-card-prescription">
                 <div className="details-header-prescription">
                   <div>
-                    <h2>Prescription Details</h2>
+                    <h2>Medicament Details</h2>
                     <p>
                       Details for <strong>{editedPrescription?.medication_name || "Unknown"}</strong>, prescribed for {patientData?.first_name ?? "Unknown"} {patientData?.last_name ?? ""}.
                     </p>
