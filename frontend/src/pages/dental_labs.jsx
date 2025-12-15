@@ -168,7 +168,7 @@ export default function DentalLabs() {
     }
   };
 
-  // ---------------------- Filtering ----------------------
+
   const term = searchTerm.toLowerCase();
   const filteredLabs = labs
   .map(lab => {
@@ -181,7 +181,6 @@ export default function DentalLabs() {
           ls.service_name?.toLowerCase().includes(term)
         );
 
-    // Include lab if either lab name matches or at least one service matches
     if(labMatches || filteredServices.length > 0) {
       return { ...lab, services: filteredServices };
     }

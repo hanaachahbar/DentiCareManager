@@ -19,7 +19,6 @@ function PrescriptionManagement() {
 
   const API_BASE = "http://localhost:5000/api/prescriptions";
 
-  //normalize API response to array of prescriptions
   const normalizePrescriptions = (data) => {
     if (!data) return [];
     if (Array.isArray(data)) return data;
@@ -44,7 +43,6 @@ function PrescriptionManagement() {
       setMasterMedications(Array.isArray(availRes.data) ? availRes.data : []);
       setPatientData(Array.isArray(patientRes.data) && patientRes.data.length > 0 ? patientRes.data[0] : null);
 
-      // set defaults for selected / edited
       if (presData.length > 0) {
         setSelectedPrescription(presData[0]);
         setEditedPrescription({ ...presData[0] });
@@ -67,7 +65,6 @@ function PrescriptionManagement() {
 
   useEffect(() => {
     loadAllData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appointmentId]);
 
   // Filter meds by search term
@@ -78,7 +75,7 @@ function PrescriptionManagement() {
   // Select a prescription from list
   const handleSelectPrescription = (prescription) => {
     setSelectedPrescription(prescription);
-    setEditedPrescription({ ...prescription }); // clone to edit safely
+    setEditedPrescription({ ...prescription });
     setIsEditing(false);
   };
 
@@ -143,7 +140,6 @@ function PrescriptionManagement() {
     }
   };
 
-  // Add new medication -------fix later after Merge PR ------------
   const handleAddNewMedicationToMaster = async (newMed) => {
     try {
       const res = await axios.post(`http://localhost:5000/api/medications`, {
@@ -153,7 +149,7 @@ function PrescriptionManagement() {
       if (res.data && res.data.medication_id) {
         setMasterMedications((prev) => [res.data, ...prev]);
       } else {
-        // fallback: reload available meds
+  
         const availRes = await axios.get(`${API_BASE}/${appointmentId}/available-medications`);
         setMasterMedications(Array.isArray(availRes.data) ? availRes.data : []);
       }
@@ -226,7 +222,6 @@ function PrescriptionManagement() {
     <div className="prescription-container-prescription">
       <main className="main-content-prescription">
         <div className="content-grid-prescription">
-          {/* Sidebar */}
           <div className="sidebar-prescription">
             <div className="page-header-prescription">
               <div>
@@ -235,7 +230,6 @@ function PrescriptionManagement() {
               </div>
             </div>
 
-            {/* Assigned Prescriptions */}
             <div className="card-prescription">
               <div className="card-header-prescription">
                 <h2>Assigned Prescriptions</h2>
@@ -273,7 +267,6 @@ function PrescriptionManagement() {
               </div>
             </div>
 
-            {/* Add Medication */}
             <div className="card-prescription">
               <div className="card-header-prescription">
                 <h2>Add Medication</h2>
@@ -319,7 +312,6 @@ function PrescriptionManagement() {
             </div>
           </div>
 
-          {/* Main Details */}
           <div className="details-section-prescription">
             {selectedPrescription ? (
               <div className="card-prescription details-card-prescription">
@@ -423,7 +415,6 @@ function PrescriptionManagement() {
         </div>
       </main>
 
-      {/* Add Medication Modal */}
       {showAddMedicationModal && (
         <AddNewMedicament onAdd={handleAddNewMedicationToMaster} onClose={() => setShowAddMedicationModal(false)} />
       )}
