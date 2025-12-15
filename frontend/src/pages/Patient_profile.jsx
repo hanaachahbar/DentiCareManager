@@ -193,8 +193,9 @@ const PatientProfile = () => {
   };
 
   const openEditModal = () => {
-    setEditForm({ ...patient });
-    setIsEditModalOpen(true);
+    navigate(`/add_patient/${patient.patient_id}`)
+    //setEditForm({ ...patient });
+    //setIsEditModalOpen(true);
   };
 
   const closeEditModal = () => {

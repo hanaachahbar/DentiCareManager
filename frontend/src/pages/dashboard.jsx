@@ -1,5 +1,5 @@
 import '../styles/dashboard.css';
-import { UserPlus, CalendarPlus } from 'lucide-react';
+import { UserPlus, CalendarPlus, CalendarX, UserX } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -11,6 +11,8 @@ export default function Dashboard() {
   const [totalAppointments, setTotalAppointments] = useState(0);
   const [dailyAmount, setDailyAmount] = useState(0);
   const [completedServices, setCompletedServices] = useState(0);
+  const [foundPatients, setFoundPatients] = useState(false);
+  const [foundUpcomingAppointments, setFoundUpcoming] = useState(false);
 
   function getInitials(name) {
     var initial = '';
@@ -27,21 +29,13 @@ export default function Dashboard() {
     try {
       const response = await axios.get('http://localhost:5000/api/patients');
       console.log(response.data);
-      
-      // Handle different response formats
-      let patientsList = [];
-      if (Array.isArray(response.data)) {
-        patientsList = response.data;
-      } else if (response.data.patients && Array.isArray(response.data.patients)) {
-        patientsList = response.data.patients;
-      } else if (response.data.value && Array.isArray(response.data.value)) {
-        patientsList = response.data.value;
+      if(response.data.length > 0) {
+        setFoundPatients(true);
       }
-      
-      const max_length = (patientsList.length < 5) ? patientsList.length: 5;
+      const max_length = (response.data.length < 5) ? response.data.length: 5;
       var patient_list = [];
       for(var i=0; i<max_length; i++) {
-        const patient = patientsList[i];
+        const patient = response.data[i];
         patient_list.push(
           {id: patient['patient_id'] || patient['id'], name: patient['first_name'] + ' ' +  patient['last_name'], registered: patient.created_at.split(" ")[0]}
         );
@@ -60,6 +54,7 @@ export default function Dashboard() {
       console.log("Upcoming Appointments:", response.data.appointments);
       if(response.data.count === 0) return;
 
+      setFoundUpcoming(true);
       const A = response.data.appointments;
       setAppointments(A.slice(0, 6).map(ap => ({
         id: ap.appointment_id,
@@ -105,16 +100,6 @@ export default function Dashboard() {
     }
   }
 
-  async function getTotalCompletedServices() {
-    try {
-      const response = await axios.get('http://localhost:5000/api/services/completeServices');
-      setCompletedServices(response.data.total);
-    }
-    catch(error) {
-      console.log("Getting total completed services Error: ", error);
-    }
-  }
-
   useEffect(() => {
     getNewPatients();
     getAppointments();
@@ -146,7 +131,7 @@ export default function Dashboard() {
         <section className="card-dashboard dashboard-appointments-card">
           <h2>Upcoming Appointments</h2>
           <div className="appointments-list">
-            {appointments.map(apt => (
+            {foundUpcomingAppointments ? appointments.map(apt => (
               <div key={apt.id} className="dashboard-appointment-item">
                 <div className="dashboard-appointment-left">
                   <div className="appoint-avatar">{apt.initials}</div>
@@ -159,7 +144,14 @@ export default function Dashboard() {
                   {apt.status}
                 </span>
               </div>
-            ))}
+            ))
+            : <div style={{
+                display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                alignItems: 'center', height: 200
+              }}>
+                <CalendarX size={40} color='gray'/>
+                <p style={{padding: 30, fontSize: 18, color: 'gray'}}>no upcoming appointments at the moment</p>
+              </div>}
           </div>
         </section>
 
@@ -186,7 +178,7 @@ export default function Dashboard() {
         <section className="card-dashboard side-card">
           <h2>New Patient Registrations</h2>
           <div className="patients-list">
-            {newPatients.map((patient, idx) => (
+            {foundPatients ? newPatients.map((patient, idx) => (
               <div key={idx} className="patient-item">
                 <div>
                   <div className="patient-name">{patient.name}</div>
@@ -194,7 +186,14 @@ export default function Dashboard() {
                 </div>
                 <button className="link-button-dashboard" onClick={() => navigate(`/patient_profile/${patient.id}`)}>View Profile</button>
               </div>
-            ))}
+            ))
+            : <div style={{
+                display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                alignItems: 'center', height: 200
+              }}>
+                <UserX size={40} color='gray'/>
+                <p style={{padding: 30, fontSize: 18, color: 'gray'}}>no registrations at the moment</p>
+              </div>}
           </div>
 
           <h2 style={{ marginTop: '40px' }}>Quick Actions</h2>
