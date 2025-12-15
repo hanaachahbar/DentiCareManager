@@ -1,4 +1,3 @@
-// AddNewMedicament.jsx
 import React, { useState } from "react";
 import "../styles/AddNewMedicament.css";
 
@@ -31,7 +30,6 @@ function AddNewMedicament({ onAdd, onClose }) {
     try {
       await onAdd(newMed);
       
-      // Reset form on success
       setName("");
       setCommonUses("");
       setErrors({});
