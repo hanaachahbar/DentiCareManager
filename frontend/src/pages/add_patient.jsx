@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/add_patient.css';
-import { UserRound, CloudUpload, Bold, Plus, XCircle, File } from 'lucide-react';
+import { UserRound, Bold, Plus } from 'lucide-react';
 import axios from 'axios';
-import { useParams, UseParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function AddPatient() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -203,8 +205,8 @@ export default function AddPatient() {
             <UserRound/>
         </div>
         <div>
-          <h1>Add New Patient</h1>
-          <p>Fill in the details to add a new patient record.</p>
+          <h1>{id ? "Edit": "Add new"} Patient</h1>
+          <p>{id ? "You can edit the details above": "Fill in the details to add a new patient record"}</p>
         </div>
       </div>
 
@@ -481,9 +483,10 @@ export default function AddPatient() {
 
 
       <div className="form-actions">
-        <button type="button" className="cancel-btn">Cancel</button>
+        <button type="button" className="cancel-btn"
+        onClick={() => navigate(-1)}>Cancel</button>
         <button type="button" className="save-btn" onClick={handleSubmit}>
-          {id ? "Save": "Save Patient"}
+          {id ? "Save": "Add Patient"}
         </button>
       </div>
 

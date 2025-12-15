@@ -41,7 +41,7 @@ function App() {
           <Route path="/add_appointment" element={<AddAppointmentPage />} />
           <Route path="/emergency_reschedule" element={<EmergencyReschedule2 />} />
           <Route path="/add_bill" element={<AddBillForm />} />
-          <Route path="/prescription_management" element={<PrescriptionManagement />} />
+          <Route path="/prescription_management/:appointmentId" element={<PrescriptionManagement />} />
           
         </Routes>
       </div>

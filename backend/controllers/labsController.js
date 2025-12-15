@@ -26,7 +26,7 @@ exports.addLab = (req, res) => {
 
     const values = [name, personalContact || null, phone, email, address];
 
-    db.run(sql, values, (err) => {
+    db.run(sql, values, function (err) {
         if(err) return res.status(500).json({ error: err.message });
 
         res.status(201).json({
@@ -69,7 +69,7 @@ exports.updateLab = (req, res) => {
 
 exports.deleteLab = (req, res) => {
     const {id} = req.params;
-    db.run('DELETE FROM Labs WHERE lab_id = ?', [id], (err) => {
+    db.run('DELETE FROM Labs WHERE lab_id = ?', [id], function (err) {
         if(err) return res.status(500).json({ error: err.message });
         if(this.changes === 0) return res.status(404).json({ error: "Lab not found" });
         res.json({ message: "Lab deleted successfully" });
