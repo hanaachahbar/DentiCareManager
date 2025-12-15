@@ -69,8 +69,8 @@ exports.getPatients = (req, res) => {
       const formattedRows = rows.map(patient => ({
         ...patient,
         allergies: patient.allergies ? JSON.parse(patient.allergies) : [],
-        chronic_conditions: patient.chronic_conditions ? JSON.parse(patient.chronic_conditions) : [],
-        hereditary_conditions: patient.hereditary_conditions ? JSON.parse(patient.hereditary_conditions) : []
+        chronic_conditions: patient.chronique ? JSON.parse(patient.chronique) : [],
+        hereditary_conditions: patient.hereditaire ? JSON.parse(patient.hereditaire) : []
       }));
       res.json(formattedRows);
     });
